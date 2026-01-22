@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
+
+class UsersController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $users = User::query()
+            ->with('roles')
+
+            // 🔍 Name / Email search
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+
+            // 🎭 Role filter
+            ->when($request->role, function ($query, $role) {
+                $query->whereHas('roles', function ($q) use ($role) {
+                    $q->where('name', $role);
+                });
+            })
+
+            // 🚦 Status filter
+            ->when($request->status, function ($query, $status) {
+                $query->where('status', $status);
+            })
+
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return Inertia::render('users/Index', [
+            'users' => $users,
+            'filters' => $request->only(['search', 'role', 'status']),
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return Inertia::render('users/Create', [
+            'roles' => Role::all(),
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required',
+            'email' => 'required',
+            'password' => 'required',
+        ]);
+
+        $user = User::create($data);
+        $user->assignRole($request->roles);
+
+        return redirect()->route('users.index')->with('success', 'user add successfully');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $user = User::with('roles')->findOrFail($id);
+
+        return Inertia::render('users/Edit', [
+            'user' => $user,
+            'roles' => Role::all(),
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        $user = User::findOrFail($id);
+        $data = $request->validate([
+            'name' => 'required',
+            'email' => 'required',
+            'password' => 'required',
+            'roles' => 'array',
+        ]);
+
+        User::findOrFail($id)->update($data);
+        if (isset($data['roles'])) {
+            $user->syncRoles($data['roles']);
+        }
+
+        return redirect()->route('users.index')->with('success', 'user add successfully');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $user)
+    {
+        $user = User::findOrFail($user);
+        $user->delete();
+
+        return redirect()->route('users.index')->with('success', 'user is deleted');
+    }
+}
