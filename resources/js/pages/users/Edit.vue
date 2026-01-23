@@ -12,20 +12,20 @@ const breadcrumbs = [
 
 const props = defineProps({
     user: Object,
-    roles:Array
+    roles: Array
 })
 
 const form = useForm({
     name: props.user.name,
     email: props.user.email,
-    password: props.user.password,
-     role: props.user.roles.length
+    password: '',
+    role: props.user.roles.length
         ? props.user.roles.map(r => r.name)
-        : '',
+        : [],
 })
 
 const formSubmit = (id) => {
-    router.put(`/users/${id}`,form)
+    router.put(`/users/${id}`, form)
 }
 
 </script>
@@ -41,7 +41,6 @@ const formSubmit = (id) => {
                     back
                 </Link>
             </div>
-
             <div class="max-w-3xl w-full mx-auto bg-white p-6 rounded-xl shadow-md">
                 <h2 class="text-xl font-semibold text-gray-800 mb-6">
                     Create User
@@ -81,15 +80,15 @@ const formSubmit = (id) => {
                     <div class="grid grid-cols-2 gap-4">
                         <div v-for="role in roles" :key="role.id"
                             class="flex items-center gap-3 p-2 rounded hover:bg-gray-50">
-                            <input type="checkbox" :id="`role-${role.id}`" :value="role.name"
-                                v-model="form.role"
-                                class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                            <input type="checkbox" :id="`role-${role.id}`" :value="role.name" v-model="form.role"
+                                class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
 
                             <label :for="`role-${role.id}`" class="text-sm text-gray-700 cursor-pointer">
                                 {{ role.name }}
                             </label>
                         </div>
                     </div>
+
 
                     <!-- Submit Button -->
                     <div class="pt-4">

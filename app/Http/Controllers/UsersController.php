@@ -15,7 +15,11 @@ class UsersController extends Controller
     public function index(Request $request)
     {
         $users = User::query()
-            ->with('roles')
+            ->with([
+                'roles',
+                'student.activity',
+                'teacher.activity',
+            ])
 
             // 🔍 Name / Email search
             ->when($request->search, function ($query, $search) {
@@ -38,7 +42,7 @@ class UsersController extends Controller
             })
 
             ->latest()
-            ->paginate(10)
+            ->paginate(50)
             ->withQueryString();
 
         return Inertia::render('users/Index', [
@@ -69,7 +73,7 @@ class UsersController extends Controller
         ]);
 
         $user = User::create($data);
-        $user->assignRole($request->roles);
+        $user->assignRole($request->role);
 
         return redirect()->route('users.index')->with('success', 'user add successfully');
     }
@@ -101,19 +105,33 @@ class UsersController extends Controller
     public function update(Request $request, string $id)
     {
         $user = User::findOrFail($id);
+
         $data = $request->validate([
             'name' => 'required',
             'email' => 'required',
-            'password' => 'required',
-            'roles' => 'array',
+            'password' => 'nullable',
+            'role' => 'array',
         ]);
 
-        User::findOrFail($id)->update($data);
-        if (isset($data['roles'])) {
-            $user->syncRoles($data['roles']);
+        // basic info update
+        $user->update([
+            'name' => $data['name'],
+            'email' => $data['email'],
+        ]);
+
+        // password only if given
+        if (! empty($data['password'])) {
+            $user->update([
+                'password' => bcrypt($data['password']),
+            ]);
         }
 
-        return redirect()->route('users.index')->with('success', 'user add successfully');
+        // role update
+        if (isset($data['role'])) {
+            $user->syncRoles($data['role']);
+        }
+
+        return redirect()->route('users.index');
     }
 
     /**

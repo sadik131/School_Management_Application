@@ -68,7 +68,6 @@ const handleDelete = (id) => {
                                     class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">
                                     Delete
                                 </button>
-
                             </td>
                         </tr>
                     </tbody>
