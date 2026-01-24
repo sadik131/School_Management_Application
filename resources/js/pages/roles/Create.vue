@@ -1,5 +1,6 @@
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue';
+import { useAuth } from '@/lib/auth';
 import { dashboard } from '@/routes';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
@@ -24,6 +25,8 @@ const form = useForm({
 const formSubmit = () => {
     form.post('/roles')
 }
+const { hasRole, hasAnyRole, can } = useAuth()
+import { usePage } from '@inertiajs/vue3'
 
 </script>
 

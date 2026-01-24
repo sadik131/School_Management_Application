@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 
@@ -64,20 +65,31 @@ class UsersController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'name' => 'required',
-            'email' => 'required',
-            'password' => 'required',
-        ]);
+   public function store(Request $request)
+{
+    $data = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|min:6',
+        'roles' => 'required|array',
+    ]);
 
-        $user = User::create($data);
-        $user->assignRole($request->role);
+    // 🔐 password hash
+    $data['password'] = Hash::make($data['password']);
 
-        return redirect()->route('users.index')->with('success', 'user add successfully');
-    }
+    $user = User::create([
+        'name' => $data['name'],
+        'email' => $data['email'],
+        'password' => $data['password'],
+    ]);
 
+    // ✅ role assign (multiple supported)
+    $user->syncRoles($data['roles']);
+
+    return redirect()
+        ->route('users.index')
+        ->with('success', 'User added successfully');
+}
     /**
      * Display the specified resource.
      */
@@ -91,7 +103,8 @@ class UsersController extends Controller
      */
     public function edit(string $id)
     {
-        $user = User::with('roles')->findOrFail($id);
+        // $user = User::with(['roles'])->findOrFail($id);
+        $user = User::findOrFail($id);
 
         return Inertia::render('users/Edit', [
             'user' => $user,

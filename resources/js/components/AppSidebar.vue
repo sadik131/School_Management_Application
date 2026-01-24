@@ -39,6 +39,12 @@ const mainNavItems = [
         roles: ['admin'],
     },
     {
+        title: 'Role',
+        href: '/roles',
+        icon: Lock,
+        roles: ['admin'],
+    },
+    {
         title: 'Permission',
         href: '/permission',
         icon: Lock,
@@ -57,13 +63,13 @@ const mainNavItems = [
     {
         title: '/teacher/assignments',
         href: '/teacher/assignments',
-        // roles: ['teacher'],
+        roles: ['teacher'],
         icon: Shapes,
     },
     {
         title: '/teacher/assignments/check',
         href: '/teacher/assignments/check',
-        // roles: ['teacher'],
+        roles: ['teacher'],
         icon: CopyCheck,
     },
 

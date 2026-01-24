@@ -35,27 +35,42 @@ class HandleInertiaRequests extends Middleware
      * @return array<string, mixed>
      */
     public function share(Request $request): array
-    {
-        [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
-        $user = $request->user();
-        return [
-            ...parent::share($request),
-            'name' => config('app.name'),
-            'quote' => ['message' => trim($message), 'author' => trim($author)],
-            'auth' => [
-                'user' => $user ? [
+{
+    [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+    $user = $request->user();
+
+    return [
+        ...parent::share($request),
+
+        'name' => config('app.name'),
+        'quote' => [
+            'message' => trim($message),
+            'author' => trim($author),
+        ],
+
+        'auth' => [
+            // 👤 basic user info only
+            'user' => $user ? [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-
-                // 🔑 Roles
-                'roles' => $user->getRoleNames(), 
-
-                // 🔐 Permissions
-                'permissions' => $user->getAllPermissions()->pluck('name'),
             ] : null,
-            ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-        ];
-    }
+
+            // ✅ Option-A: roles here
+            'roles' => $user
+                ? $user->getRoleNames()->toArray()
+                : [],
+
+            // ✅ Option-A: permissions here
+            'permissions' => $user
+                ? $user->getAllPermissions()->pluck('name')->toArray()
+                : [],
+        ],
+
+        'sidebarOpen' =>
+            ! $request->hasCookie('sidebar_state')
+            || $request->cookie('sidebar_state') === 'true',
+    ];
+}
+
 }

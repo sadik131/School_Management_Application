@@ -108,7 +108,6 @@ const { isAdmin, can } = useAuth()
   
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex flex-col gap-4 rounded-xl p-4">
-      {{ isAdmin }}
 
       <!-- Create -->
       <div>

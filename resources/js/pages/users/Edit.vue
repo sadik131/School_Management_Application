@@ -41,6 +41,7 @@ const formSubmit = (id) => {
                     back
                 </Link>
             </div>
+            {{ props.user }}
             <div class="max-w-3xl w-full mx-auto bg-white p-6 rounded-xl shadow-md">
                 <h2 class="text-xl font-semibold text-gray-800 mb-6">
                     Create User

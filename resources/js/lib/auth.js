@@ -1,28 +1,19 @@
+import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 
 export function useAuth() {
-  const page = usePage()
-  const user = page.props.auth?.user
+    const page = usePage()
 
-  const hasRole = (role) => {
-    return user?.roles?.includes(role)
-  }
+    const roles = computed(() => page.props.auth?.roles ?? [])
+    const permissions = computed(() => page.props.auth?.permissions ?? [])
 
-  const hasAnyRole = (roles = []) => {
-    return roles.some(r => user?.roles?.includes(r))
-  }
+    const hasRole = (role) => roles.value.includes(role)
 
-  const can = (permission) => {
-    return user?.permissions?.includes(permission)
-  }
+    const hasAnyRole = (checkRoles) =>
+        checkRoles.some(r => roles.value.includes(r))
 
-  return {
-    user,
-    hasRole,
-    hasAnyRole,
-    can,
-    isAdmin: hasRole('admin'),
-    isTeacher: hasRole('teacher'),
-    isStudent: hasRole('student'),
-  }
+    const can = (permission) =>
+        permissions.value.includes(permission)
+
+    return { hasRole, hasAnyRole, can }
 }
