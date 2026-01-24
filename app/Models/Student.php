@@ -13,10 +13,11 @@ class Student extends Model
     protected $fillable = [
         'user_id',
         'student_id',
-        'course',
-        'section',
-        'semester',
         'roll_number',
+        'section_id',
+        'program',
+        'semester',
+        'admission_year',
     ];
 
     // Relations

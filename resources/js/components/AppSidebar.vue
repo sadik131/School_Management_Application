@@ -39,6 +39,24 @@ const mainNavItems = [
         roles: ['admin'],
     },
     {
+        title: 'Course',
+        href: '/courses',
+        icon: Users,
+        roles: ['admin'],
+    },
+    {
+        title: 'Semesters',
+        href: '/semesters',
+        icon: Users,
+        roles: ['admin'],
+    },
+    {
+        title: 'Sections',
+        href: '/sections',
+        icon: Users,
+        roles: ['admin'],
+    },
+    {
         title: 'Role',
         href: '/roles',
         icon: Lock,
@@ -54,6 +72,13 @@ const mainNavItems = [
         title: 'Profile',
         href: '/profile',
         icon: UserPen,
+        roles: ['teacher', 'admin'],
+    },
+    {
+        title: 'Profile',
+        href: '/student/profile',
+        icon: UserPen,
+        roles: ['student'],
     },
     {
         title: 'Ai',

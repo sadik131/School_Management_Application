@@ -25,8 +25,6 @@ const form = useForm({
 const formSubmit = () => {
     form.post('/roles')
 }
-const { hasRole, hasAnyRole, can } = useAuth()
-import { usePage } from '@inertiajs/vue3'
 
 </script>
 

@@ -15,8 +15,6 @@ const props = defineProps({
     role:Object
 })
 
-console.log(props.permissions)
-
 const form = useForm({
     name: props.role.name ||'',
     permissions: props.role.permissions
@@ -44,7 +42,6 @@ const formSubmit = (id) => {
                     back
                 </Link>
             </div>
-
             <div class="max-w-3xl w-full mx-auto bg-white p-6 rounded-xl shadow-md">
                 <h2 class="text-xl font-semibold text-gray-800 mb-6">
                     Edit Role

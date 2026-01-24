@@ -102,15 +102,18 @@ class UsersController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
-    {
-        // $user = User::with(['roles'])->findOrFail($id);
-        $user = User::findOrFail($id);
+{
+    $user = User::with([
+        'roles',
+        'student',
+        'teacher',
+    ])->findOrFail($id);
 
-        return Inertia::render('users/Edit', [
-            'user' => $user,
-            'roles' => Role::all(),
-        ]);
-    }
+    return Inertia::render('users/Edit', [
+        'user' => $user,
+        'roles' => Role::all(),
+    ]);
+}
 
     /**
      * Update the specified resource in storage.

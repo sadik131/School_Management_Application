@@ -2,53 +2,63 @@
 
 namespace Database\Seeders;
 
+use App\Models\Section;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Faker\Factory as Faker;
 
 use App\Models\User;
-use App\Models\Teacher;
 use App\Models\Student;
-use App\Models\TeacherActivity;
+use App\Models\Teacher;
 use App\Models\StudentActivity;
-use App\Models\Section;
+use App\Models\TeacherActivity;
 use Spatie\Permission\Models\Role;
 
 class BulkUserSeeder extends Seeder
 {
     public function run(): void
     {
+        $sections = Section::all();
+
         $faker = Faker::create('en_IN');
 
-        // 🔐 Ensure roles exist
-        Role::firstOrCreate(['name' => 'admin']);
-        Role::firstOrCreate(['name' => 'teacher']);
-        Role::firstOrCreate(['name' => 'student']);
+        // =========================
+        // Ensure Roles
+        // =========================
+        $adminRole   = Role::firstOrCreate(['name' => 'admin']);
+        $teacherRole = Role::firstOrCreate(['name' => 'teacher']);
+        $studentRole = Role::firstOrCreate(['name' => 'student']);
 
-        /**
-         * =========================
-         * 10 TEACHERS
-         * =========================
-         */
-        for ($i = 1; $i <= 10; $i++) {
+        // =========================
+        // ADMIN USER
+        // =========================
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'System Admin',
+                'password' => Hash::make('12345678'),
+            ]
+        );
+
+        $admin->syncRoles(['admin']);
+
+        // =========================
+        // TEACHERS (5)
+        // =========================
+        for ($i = 1; $i <= 5; $i++) {
 
             $user = User::create([
                 'name' => $faker->name,
                 'email' => "teacher{$i}@school.com",
-                'phone' => $faker->numerify('9#########'),
-                'gender' => $faker->randomElement(['Male', 'Female']),
-                'dob' => $faker->dateTimeBetween('-45 years', '-30 years'),
-                'blood' => $faker->randomElement(['A+', 'B+', 'O+', 'AB+']),
-                'address' => $faker->city . ', India',
                 'password' => Hash::make('password'),
             ]);
 
-            $user->assignRole('teacher');
+            $user->syncRoles(['teacher']);
 
             $teacher = Teacher::create([
                 'user_id' => $user->id,
-                'teacher_id' => 'TCH-' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                'department' => 'Computer Applications',
+                'teacher_id' => 'TCH-' . rand(1000, 9999),
+                'department' => 'BCA',
                 'designation' => $faker->randomElement([
                     'Lecturer',
                     'Assistant Professor'
@@ -60,57 +70,41 @@ class BulkUserSeeder extends Seeder
             TeacherActivity::create([
                 'teacher_id' => $teacher->id,
                 'total_assignments' => rand(20, 40),
-                'checked_assignments' => rand(15, 30),
-                'pending_assignments' => rand(1, 10),
-                'total_classes' => rand(100, 160),
+                'checked_assignments' => rand(10, 30),
+                'pending_assignments' => rand(0, 10),
+                'total_classes' => rand(80, 150),
                 'attendance_avg' => rand(75, 90) . '%',
                 'eligible_students' => rand(40, 60),
-                'detained_students' => rand(1, 8),
+                'detained_students' => rand(0, 5),
             ]);
         }
 
-        /**
-         * =========================
-         * STUDENTS (BULK)
-         * =========================
-         */
-
-        // 🔵 fetch all sections (A/B/C etc)
-        $sections = Section::all();
-
-        if ($sections->isEmpty()) {
-            $this->command->error('❌ No sections found. Seed courses/semesters/sections first.');
-            return;
-        }
-
-        for ($i = 1; $i <= 20; $i++) {
+        // =========================
+        // STUDENTS (10)
+        // =========================
+        for ($i = 1; $i <= 10; $i++) {
 
             $user = User::create([
                 'name' => $faker->name,
                 'email' => "student{$i}@school.com",
-                'phone' => $faker->numerify('9#########'),
-                'gender' => $faker->randomElement(['Male', 'Female']),
-                'dob' => $faker->dateTimeBetween('-22 years', '-18 years'),
-                'blood' => $faker->randomElement(['A+', 'B+', 'O+', 'AB+']),
-                'address' => $faker->city . ', India',
                 'password' => Hash::make('password'),
             ]);
 
-            $user->assignRole('student');
+            $user->syncRoles(['student']);
 
             $student = Student::create([
                 'user_id' => $user->id,
-                'section_id' => $sections->random()->id, // 🔥 KEY LINE
-                'student_id' => 'STD-2023-' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                'roll_number' => 'BCA-5-' . $i,
+                'student_id' => 'STD-' . now()->year . '-' . rand(1000, 9999),
+                'roll_number' => 'BCA-' . rand(1, 99),
+                'section_id' => $sections->random()->id,
             ]);
 
             StudentActivity::create([
                 'student_id' => $student->id,
                 'attendance_percentage' => rand(65, 90),
-                'classes_attended' => rand(80, 120),
+                'classes_attended' => rand(70, 120),
                 'total_classes' => 130,
-                'assignments_submitted' => rand(15, 25),
+                'assignments_submitted' => rand(10, 25),
                 'assignments_pending' => rand(0, 5),
                 'assignments_late' => rand(0, 3),
                 'exam_eligible' => true,
