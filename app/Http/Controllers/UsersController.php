@@ -161,6 +161,7 @@ class UsersController extends Controller
     public function storeOrUpdateTeacher(Request $request, User $user)
     {
         $validated = $request->validate([
+            'teacher_id'   => 'required|integer',
             'department' => 'required|string',
             'designation' => 'required|string',
             'qualification' => 'required|string',
@@ -168,11 +169,11 @@ class UsersController extends Controller
             'sections' => ['required', 'array'],
             'sections.*' => ['integer', 'exists:sections,id'],
         ]);
-
         // 🔎 create or get teacher
         $teacher = Teacher::updateOrCreate(
             ['user_id' => $user->id],
             [
+                'teacher_id'   => $validated['teacher_id'],
                 'department' => $validated['department'],
                 'designation' => $validated['designation'],
                 'qualification' => $validated['qualification'],
@@ -184,22 +185,18 @@ class UsersController extends Controller
         $teacher->sections()->sync($validated['sections']);
 
         return back()->with('success', 'Teacher info saved successfully');
-    }
-
+        }
+        
     public function storeOrUpdateStudent(Request $request, User $user)
     {
         $data = $request->validate([
             'student_id' => 'required|string',
             'section_id' => 'required|exists:sections,id',
             'admission_year' => 'required|integer',
+            'roll_number' => 'required|integer|min:1',
         ]);
-
         $section = Section::with('semester.course')->findOrFail($data['section_id']);
         $course = $section->semester->course;
-
-        // 🔢 section-wise roll number
-        $lastRoll = Student::where('section_id', $section->id)->max('roll_number');
-        $nextRoll = ($lastRoll ?? 0) + 1;
 
         Student::updateOrCreate(
             ['user_id' => $user->id],
@@ -208,8 +205,10 @@ class UsersController extends Controller
                 'section_id' => $section->id,
                 'admission_year' => $data['admission_year'],
 
+                // ✅ admin provided roll number
+                'roll_number' => $data['roll_number'],
+
                 // auto-filled
-                'roll_number' => $nextRoll,
                 'program' => $course->code ?: $course->name,
                 'semester' => $section->semester->number,
             ]

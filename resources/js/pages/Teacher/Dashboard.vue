@@ -5,32 +5,63 @@ import { dashboard } from '@/routes'
 import { Head, Link } from '@inertiajs/vue3'
 
 /* ================= BREADCRUMB ================= */
-const breadcrumbs= [
+const breadcrumbs = [
   { title: 'Teacher Dashboard', href: dashboard().url },
 ]
 
 /* ================= PROPS ================= */
 const props = defineProps({
   stats: Object,
-  myClasses: Array,
+  myClasses: {
+    type: Array,
+    default: () => [],
+  },
 })
 
-/* ================= KPI ================= */
+/* ================= COMPUTED KPI ================= */
+
+// total students across all assigned sections
+const totalStudents = computed(() =>
+  props.myClasses.reduce(
+    (sum, section) =>
+      sum + (section.students_count ?? section.students?.length ?? 0),
+    0
+  )
+)
+
+// unique courses teacher teaches
+const totalCourses = computed(() => {
+  const courseIds = props.myClasses.map(
+    section => section.semester?.course?.id
+  )
+  return new Set(courseIds).size
+})
+
 const kpiCards = computed(() => [
   {
     title: 'My Classes',
-    value: props.stats?.total_sections ?? 0,
+    value: props.myClasses.length,
     color: 'from-blue-500 to-cyan-400',
   },
   {
-    title: 'Total Assignments',
-    value: 18, // dummy
+    title: 'Total Students',
+    value: totalStudents.value,
     color: 'from-indigo-500 to-violet-500',
   },
   {
-    title: 'Pending Submissions',
-    value: 27, // dummy
-    color: 'from-orange-500 to-red-500',
+    title: 'Courses I Teach',
+    value: totalCourses.value,
+    color: 'from-emerald-500 to-teal-400',
+  },
+  {
+    title: 'Submitted',
+    value: props.stats?.submitted ?? 0,
+    color: 'from-green-500 to-emerald-400',
+  },
+  {
+    title: 'Pending',
+    value: props.stats?.pending ?? 0,
+    color: 'from-orange-500 to-red-400',
   },
 ])
 </script>
@@ -54,96 +85,104 @@ const kpiCards = computed(() => [
           </p>
         </div>
       </div>
-{{ myClasses }}
-      <div class="flex w-full gap-4 ">
-        <div class="rounded-xl bg-white shadow w-full h-[50vh] overflow-y-scroll">
-          <div class="sticky top-0 z-20 border-b px-4 py-3">
-            <h2 class="text-sm font-semibold text-gray-700">
-              Teaching Overview
-            </h2>
-          </div>
 
-          <div class="overflow-x-auto h-[calc(50vh-48px)]">
-            <table class="w-full text-sm">
-              <thead class="sticky top-0 z-10 bg-gray-50 text-gray-600">
-                <tr>
-                  <th class="px-4 py-3 text-left font-medium">Course</th>
-                  <th class="px-4 py-3 text-left font-medium">Semester</th>
-                  <th class="px-4 py-3 text-left font-medium">Section</th>
-                  <th class="px-4 py-3 text-right font-medium">Students</th>
-                </tr>
-              </thead>
+      <!-- ================= TABLES ================= -->
+      <div class="flex w-full gap-4">
 
-              <tbody class="divide-y">
-                <tr v-for="section in myClasses" :key="section.id" class="hover:bg-gray-50">
-                  <td class="px-4 py-3">
-                    {{ section.semester.course.name }}
-                  </td>
-
-                  <td class="px-4 py-3">
-                    {{ section.semester.name }}
-                  </td>
-
-                  <td class="px-4 py-3">
-                    {{ section.name }}
-                  </td>
-
-                  <td class="px-4 py-3 text-right text-gray-600">
-                    {{ section.capacity }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="rounded-xl bg-white shadow w-full h-[50vh] overflow-y-scroll">
-          <div class="sticky top-0 z-20 border-b px-4 py-3">
+        <!-- ================= ASSIGNMENT OVERVIEW ================= -->
+        <div class="rounded-xl bg-white shadow w-full h-[50vh] overflow-y-auto">
+          <div class="sticky top-0 z-20 border-b px-4 py-3 bg-white">
             <h2 class="text-sm font-semibold text-gray-700">
               Assignment Overview
             </h2>
           </div>
 
-          <div class="h-[calc(50vh-48px)] overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead class="sticky top-0 z-10 bg-gray-50 text-gray-600">
-                <tr>
-                  <th class="px-4 py-3 text-left font-medium">Class</th>
-                  <th class="px-4 py-3 text-center font-medium">Submitted</th>
-                  <th class="px-4 py-3 text-center font-medium">Pending</th>
-                  <th class="px-4 py-3 text-right font-medium">Action</th>
-                </tr>
-              </thead>
+          <table class="w-full text-sm">
+            <thead class="sticky top-0 z-10 bg-gray-50 text-gray-600">
+              <tr>
+                <th class="px-4 py-3 text-left font-medium">Class</th>
+                <th class="px-4 py-3 text-center font-medium">Total Students</th>
+                <th class="px-4 py-3 text-right font-medium">Action</th>
+              </tr>
+            </thead>
 
-              <tbody class="divide-y">
-                <tr v-for="section in myClasses" :key="section.id" class="hover:bg-gray-50">
-                  <td class="px-4 py-3">
-                    {{ section.semester.course.name }}
-                    · {{ section.semester.name }}
-                    · {{ section.name }}
-                  </td>
+            <tbody class="divide-y">
+              <tr v-for="section in myClasses" :key="section.id" class="hover:bg-gray-50">
+                <td class="px-4 py-3">
+                  {{ section.semester.course.code }}
+                  · {{ section.semester.name }}
+                  · Section {{ section.name }}
+                </td>
 
-                  <td class="px-4 py-3 text-center font-medium">
-                    32
-                  </td>
+                <td class="px-4 py-3 text-center font-semibold">
+                  {{ section.students_count ?? section.students.length }}
+                </td>
 
-                  <td class="px-4 py-3 text-center font-medium text-red-600">
-                    8
-                  </td>
+                <td class="px-4 py-3 text-right">
+                  <Link :href="`/teacher/assignments/create?section=${section.id}`"
+                    class="text-indigo-600 hover:underline text-sm font-medium">
+                    Create Assignment
+                  </Link>
+                </td>
+              </tr>
 
-                  <td class="px-4 py-3 text-right">
-                    <Link :href="`/teacher/assignments/create?section=${section.id}`"
-                      class="text-indigo-600 hover:underline text-sm">
-                      Create
-                    </Link>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+              <tr v-if="!myClasses.length">
+                <td colspan="3" class="px-4 py-8 text-center text-gray-500">
+                  No classes available
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
 
+        <!-- ================= TEACHING OVERVIEW ================= -->
+        <div class="rounded-xl bg-white shadow w-full h-[50vh] overflow-y-auto">
+          <div class="sticky top-0 z-20 border-b px-4 py-3 bg-white">
+            <h2 class="text-sm font-semibold text-gray-700">
+              Teaching Overview
+            </h2>
+          </div>
+
+          <table class="w-full text-sm">
+            <thead class="sticky top-0 z-10 bg-gray-50 text-gray-600">
+              <tr>
+                <th class="px-4 py-3 text-left font-medium">Course</th>
+                <th class="px-4 py-3 text-left font-medium">Students</th>
+                <th class="px-4 py-3 text-left font-medium">Submit</th>
+                <th class="px-4 py-3 text-left font-medium">Pending</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y">
+              <tr v-for="section in myClasses" :key="section.id" class="hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium">
+                  {{ section.semester.course.code }} - {{ section.semester.number }}{{ section.name }}
+                </td>
+
+                <td class="px-4 py-3">
+                  {{ section.students_count ?? section.students.length }}
+                </td>
+
+                <td class="px-4 py-3">
+                  0
+                </td>
+
+                <td class="px-4 py-3 text-left text-red-400 font-semibold">
+                  0
+
+                </td>
+              </tr>
+
+              <tr v-if="!myClasses.length">
+                <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                  No sections assigned yet
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
     </div>
   </AppLayout>
 </template>

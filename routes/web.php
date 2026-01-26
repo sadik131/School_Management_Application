@@ -6,12 +6,14 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\SemesterController;
+use App\Http\Controllers\StudentAssignmentController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentProfileController;
 use App\Http\Controllers\TeacherAssignmentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\UsersController;
+use App\Models\Assign;
 use App\Models\Course;
 use App\Models\Section;
 use App\Models\Student;
@@ -27,16 +29,16 @@ Route::get('/', function () {
 
 // admin dashboard
 Route::get('dashboard', function () {
-   return Inertia::render('Dashboard', [
+    return Inertia::render('Dashboard', [
         'stats' => [
             'total_students' => Student::count(),
             'total_teachers' => Teacher::count(),
-            'total_course'    => Course::count(),
-            'total_section'    => Section::count(),
+            'total_course' => Course::count(),
+            'total_section' => Section::count(),
+            'total_assignments'=> Assign::count(),
         ],
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
-
 
 Route::post(
     '/users/{user}/teacher',
@@ -47,7 +49,6 @@ Route::post(
     '/users/{user}/student',
     [UsersController::class, 'storeOrUpdateStudent']
 )->name('users.student.store');
-
 
 Route::middleware(['auth', 'role:teacher'])->group(function () {
     Route::get(
@@ -61,9 +62,8 @@ Route::middleware(['auth', 'role:teacher'])->group(function () {
     )->name('teacher.assignments.store');
 });
 
-
 // teacherDashbord
-Route::get('/TeacherDash',[TeacherDashboardController::class, 'index'])->name('TeacherDash');
+Route::get('/TeacherDash', [TeacherDashboardController::class, 'index'])->name('TeacherDash');
 
 // -------------------------------------------------------------------
 
@@ -118,3 +118,11 @@ Route::post('/users/{id}/student', [StudentController::class, 'storeOrUpdate']);
 Route::post('/users/{id}/teacher', [TeacherController::class, 'storeOrUpdate']);
 
 // -------------------------------------------------------------------
+
+Route::get(
+    '/teacher/ass',
+    [TeacherAssignmentController::class, 'index']
+)->name('teacher.assignments.index');
+
+
+Route::resource('/Student/dashboard',StudentAssignmentController::class);

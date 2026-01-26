@@ -256,9 +256,8 @@ const closeModal = () => {
                     class="pl-2 border-l-2 border-indigo-200">
                     <div class="text-gray-600 ml-2">
                       {{ group.semester.course.name }} ·
-{{ group.semester.name }} ·
-section {{ group.name }}
-                      <!-- {{ selectedUser }} · Section {{ group.name }} -->
+                      {{ group.semester.name }} ·
+                      section {{ group.name }}
                     </div>
                   </div>
                 </div>

@@ -21,6 +21,8 @@ const kpiCards = [
     { title: 'Pending Requests', value: props.stats?.pending_assignment ?? 0, color: 'from-gray-700 to-gray-500' },
 ]
 
+{{props.stats}}
+
 const assignment = [
   {
     id: 1,

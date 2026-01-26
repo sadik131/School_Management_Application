@@ -81,13 +81,19 @@ const mainNavItems = [
         roles: ['student'],
     },
     {
+        title: 'Dashboard',
+        href: '/Student/dashboard',
+        icon: UserPen,
+        roles: ['student'],
+    },
+    {
         title: 'Ai',
         href: '/boat',
         icon: Bot,
     },
     {
-        title: '/teacher/assignments',
-        href: '/teacher/assignments',
+        title: 'Assignments',
+        href: '/teacher/ass',
         roles: ['teacher'],
         icon: Shapes,
     },

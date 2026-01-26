@@ -37,6 +37,7 @@ const studentForm = useForm({
   student_id: props.user.student?.student_id ?? '',
   admission_year: props.user.student?.admission_year ?? '',
   section_id: props.user.student?.section_id ?? '',
+  roll_number: props.user.student?.roll_number ?? '',
 })
 
 const studentCourses = computed(() => {
@@ -92,6 +93,7 @@ const teacherCourse = ref('')
 const teacherSemester = ref('')
 
 const teacherForm = useForm({
+  teacher_id: props.user.teacher?.teacher_id ?? '',
   department: props.user.teacher?.department ?? '',
   designation: props.user.teacher?.designation ?? '',
   qualification: props.user.teacher?.qualification ?? '',
@@ -166,7 +168,6 @@ onMounted(() => {
 
   <AppLayout>
     <div class="mx-auto max-w-4xl space-y-6 p-6">
-
       <Link href="/users" class="inline-block rounded bg-indigo-600 px-4 py-2 text-sm text-white">
         ← Back
       </Link>
@@ -200,6 +201,9 @@ onMounted(() => {
         <div class="space-y-4">
           <input v-model="studentForm.student_id" placeholder="Student ID" class="w-full rounded border px-4 py-2" />
 
+          <input type="number" v-model="studentForm.roll_number" class="w-full rounded border px-4 py-2"
+            placeholder="Roll Number" />
+
           <input v-model="studentForm.admission_year" type="number" placeholder="Admission Year"
             class="w-full rounded border px-4 py-2" />
 
@@ -231,6 +235,7 @@ onMounted(() => {
         <h3 class="mb-4 text-lg font-semibold">Teacher Information</h3>
 
         <div class="space-y-4">
+          <input type="number" v-model="teacherForm.teacher_id" placeholder="Teacher ID" class="w-full rounded border px-4 py-2" />
           <input v-model="teacherForm.department" placeholder="Department" class="w-full rounded border px-4 py-2" />
 
           <input v-model="teacherForm.designation" placeholder="Designation" class="w-full rounded border px-4 py-2" />

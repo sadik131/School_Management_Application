@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assign;
-use App\Models\Section;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,9 +11,19 @@ class TeacherAssignmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $teacher = $request->user()->teacher;
+        $totalAssignments = $teacher->assignments()->count();
+        $assignments = $teacher->assignments()
+            ->with('section.semester.course')
+            ->latest()
+            ->get();
+
+        return Inertia::render('Teacher/Assignments/Index', [
+        'assignments' => $assignments,
+        'totalAssignments' => $totalAssignments,
+        ]);
     }
 
     /**
@@ -23,7 +32,6 @@ class TeacherAssignmentController extends Controller
     public function create(Request $request)
     {
         $teacher = $request->user()->teacher;
-
         $sections = $teacher->sections()
             ->with('semester.course')
             ->get();
@@ -44,10 +52,8 @@ class TeacherAssignmentController extends Controller
             'description' => 'nullable|string',
             'due_date' => 'required|date',
         ]);
-
         $teacher = $request->user()->teacher;
 
-        // 🔒 security check: teacher owns this section
         abort_unless(
             $teacher->sections()->where('sections.id', $request->section_id)->exists(),
             403
