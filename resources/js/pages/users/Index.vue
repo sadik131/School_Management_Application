@@ -45,42 +45,6 @@ const handleDelete = (id) => {
   }
 }
 
-const studentProfile = {
-  basic: {
-    name: 'Amit Kumar',
-    email: 'amit.student@school.com',
-    phone: '+91 99887 66554',
-    gender: 'Male',
-    dob: '2003-04-18',
-    blood: 'B+',
-    address: 'Patna, Bihar',
-  },
-
-  academic: {
-    studentId: 'STD-2023-045',
-    course: 'BCA',
-    section: 'A',
-    semester: '5th',
-    rollNumber: 'BCA-5A-23',
-  },
-
-  activity: {
-    attendance: {
-      percentage: '78%',
-      classesAttended: 94,
-      totalClasses: 120,
-    },
-    assignments: {
-      submitted: 18,
-      pending: 4,
-      late: 2,
-    },
-    examStatus: {
-      eligible: true,
-      detained: false,
-    },
-  },
-}
 
 
 /* ---------------- Modal State ---------------- */
@@ -97,15 +61,12 @@ const closeModal = () => {
   selectedUser.value = null
 }
 
-import { useAuth } from '@/lib/auth'
-
-const { isAdmin, can } = useAuth()
 </script>
 
 <template>
 
   <Head title="Users" />
-  
+
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex flex-col gap-4 rounded-xl p-4">
 
@@ -115,7 +76,6 @@ const { isAdmin, can } = useAuth()
           Create User
         </Link>
       </div>
-
       <!-- Filters -->
       <div class="bg-white p-4 rounded-xl shadow flex flex-wrap gap-3 items-center">
         <input v-model="filters.search" type="text" placeholder="Search name or email..."
@@ -243,12 +203,12 @@ const { isAdmin, can } = useAuth()
             <!-- STUDENT ACADEMIC -->
             <div v-if="selectedUser?.student" class="bg-gray-50 rounded-xl p-4 space-y-1">
               <h4 class="font-semibold text-gray-800 mb-2">Academic Information</h4>
-
               <div class="grid grid-cols-2 gap-x-4 gap-y-2">
                 <div><span class="text-gray-500">Student ID:</span> {{ selectedUser.student.student_id ?? 'Not set' }}
                 </div>
-                <div><span class="text-gray-500">Course:</span> {{ selectedUser.student.course ?? 'Not set' }}</div>
-                <div><span class="text-gray-500">Section:</span> {{ selectedUser.student.section ?? 'Not set' }}</div>
+                <div><span class="text-gray-500">Course:</span> {{ selectedUser.student.program ?? 'Not set' }}</div>
+                <div><span class="text-gray-500">Section:</span> {{ selectedUser.student.section.name ?? 'Not set' }}
+                </div>
                 <div><span class="text-gray-500">Semester:</span> {{ selectedUser.student.semester ?? 'Not set' }}</div>
                 <div class="col-span-2">
                   <span class="text-gray-500">Roll No:</span>
@@ -257,21 +217,59 @@ const { isAdmin, can } = useAuth()
               </div>
             </div>
 
-            <!-- TEACHER ACADEMIC -->
-            <div v-if="selectedUser?.teacher" class="bg-gray-50 rounded-xl p-4 space-y-1">
-              <h4 class="font-semibold text-gray-800 mb-2">Professional Information</h4>
+            <!-- ================= TEACHER ACADEMIC ================= -->
+            <div v-if="selectedUser?.teacher" class="bg-gray-50 rounded-xl p-4 space-y-3">
 
-              <div class="grid grid-cols-2 gap-x-4 gap-y-2">
-                <div><span class="text-gray-500">Teacher ID:</span> {{ selectedUser.teacher.teacher_id ?? 'Not set' }}
+              <h4 class="font-semibold text-gray-800">Professional Information</h4>
+
+              <!-- Basic Info -->
+              <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <div>
+                  <span class="text-gray-500">Teacher ID:</span>
+                  {{ selectedUser.teacher.teacher_id ?? 'Not set' }}
                 </div>
-                <div><span class="text-gray-500">Department:</span> {{ selectedUser.teacher.department ?? 'Not set' }}
+
+                <div>
+                  <span class="text-gray-500">Department:</span>
+                  {{ selectedUser.teacher.department ?? 'Not set' }}
                 </div>
-                <div><span class="text-gray-500">Designation:</span> {{ selectedUser.teacher.designation ?? 'Not set' }}
+
+                <div>
+                  <span class="text-gray-500">Designation:</span>
+                  {{ selectedUser.teacher.designation ?? 'Not set' }}
                 </div>
-                <div><span class="text-gray-500">Experience:</span> {{ selectedUser.teacher.experience ?? 'Not set' }}
+
+                <div>
+                  <span class="text-gray-500">Experience:</span>
+                  {{ selectedUser.teacher.experience ?? 'Not set' }}
                 </div>
               </div>
+
+              <!-- Assigned Classes -->
+              <div v-if="selectedUser.teacher.sections?.length">
+                <h5 class="font-medium text-gray-700 mt-3 mb-1">
+                  Assigned Classes
+                </h5>
+
+                <div class="space-y-2 text-sm">
+                  <div v-for="(group, index) in selectedUser.teacher.sections" :key="index"
+                    class="pl-2 border-l-2 border-indigo-200">
+                    <div class="text-gray-600 ml-2">
+                      {{ group.semester.course.name }} ·
+{{ group.semester.name }} ·
+section {{ group.name }}
+                      <!-- {{ selectedUser }} · Section {{ group.name }} -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div v-else class="text-sm text-gray-500">
+                No sections assigned
+              </div>
+
             </div>
+
 
             <!-- ACTIVITY -->
             <div v-if="selectedUser?.student?.activity || selectedUser?.teacher?.activity"

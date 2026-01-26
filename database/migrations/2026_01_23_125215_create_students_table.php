@@ -16,14 +16,21 @@ return new class extends Migration
 
             $table->foreignId('user_id')
                 ->constrained()
-                ->onDelete('cascade');
+                ->cascadeOnDelete();
+
+            $table->foreignId('section_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
             $table->string('student_id')->unique();
-            $table->string('course');
-            $table->string('section', 10);
-            $table->string('semester', 10);
-            $table->string('roll_number')->unique();
+            $table->string('roll_number');
+            $table->year('admission_year')->nullable();
 
+            // academic columns will be added 
+            $table->string('program')->nullable();
+            $table->unsignedTinyInteger('semester')->nullable();
+
+            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }

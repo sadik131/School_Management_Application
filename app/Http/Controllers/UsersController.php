@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Section;
+use App\Models\Student;
+use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +21,9 @@ class UsersController extends Controller
         $users = User::query()
             ->with([
                 'roles',
+                'student.section',
                 'student.activity',
+                'teacher.sections.semester.course',
                 'teacher.activity',
             ])
 
@@ -65,31 +70,32 @@ class UsersController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-   public function store(Request $request)
-{
-    $data = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|min:6',
-        'roles' => 'required|array',
-    ]);
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'roles' => 'required|array',
+        ]);
 
-    // 🔐 password hash
-    $data['password'] = Hash::make($data['password']);
+        // 🔐 password hash
+        $data['password'] = Hash::make($data['password']);
 
-    $user = User::create([
-        'name' => $data['name'],
-        'email' => $data['email'],
-        'password' => $data['password'],
-    ]);
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => $data['password'],
+        ]);
 
-    // ✅ role assign (multiple supported)
-    $user->syncRoles($data['roles']);
+        // ✅ role assign (multiple supported)
+        $user->syncRoles($data['roles']);
 
-    return redirect()
-        ->route('users.index')
-        ->with('success', 'User added successfully');
-}
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'User added successfully');
+    }
+
     /**
      * Display the specified resource.
      */
@@ -102,18 +108,20 @@ class UsersController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
-{
-    $user = User::with([
-        'roles',
-        'student',
-        'teacher',
-    ])->findOrFail($id);
+    {
+        $user = User::with([
+            'roles',
+            'teacher.sections.semester.course',
+            'student.activity',
+            'student.section',
+        ])->findOrFail($id);
 
-    return Inertia::render('users/Edit', [
-        'user' => $user,
-        'roles' => Role::all(),
-    ]);
-}
+        return Inertia::render('users/Edit', [
+            'user' => $user,
+            'roles' => Role::all(),
+            'sections' => Section::with('semester.course')->get(),
+        ]);
+    }
 
     /**
      * Update the specified resource in storage.
@@ -148,6 +156,66 @@ class UsersController extends Controller
         }
 
         return redirect()->route('users.index');
+    }
+
+    public function storeOrUpdateTeacher(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'department' => 'required|string',
+            'designation' => 'required|string',
+            'qualification' => 'required|string',
+            'experience' => 'required|string',
+            'sections' => ['required', 'array'],
+            'sections.*' => ['integer', 'exists:sections,id'],
+        ]);
+
+        // 🔎 create or get teacher
+        $teacher = Teacher::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'department' => $validated['department'],
+                'designation' => $validated['designation'],
+                'qualification' => $validated['qualification'],
+                'experience' => $validated['experience'],
+            ]
+        );
+
+        // 🔗 sync sections
+        $teacher->sections()->sync($validated['sections']);
+
+        return back()->with('success', 'Teacher info saved successfully');
+    }
+
+    public function storeOrUpdateStudent(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'student_id' => 'required|string',
+            'section_id' => 'required|exists:sections,id',
+            'admission_year' => 'required|integer',
+        ]);
+
+        $section = Section::with('semester.course')->findOrFail($data['section_id']);
+        $course = $section->semester->course;
+
+        // 🔢 section-wise roll number
+        $lastRoll = Student::where('section_id', $section->id)->max('roll_number');
+        $nextRoll = ($lastRoll ?? 0) + 1;
+
+        Student::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'student_id' => $data['student_id'],
+                'section_id' => $section->id,
+                'admission_year' => $data['admission_year'],
+
+                // auto-filled
+                'roll_number' => $nextRoll,
+                'program' => $course->code ?: $course->name,
+                'semester' => $section->semester->number,
+            ]
+        );
+
+        return back()->with('success', 'Student assigned successfully');
     }
 
     /**

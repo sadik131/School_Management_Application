@@ -8,13 +8,52 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Admin Dashboard', href: dashboard().url },
 ]
 
+const props = defineProps({
+    stats: Object
+});
+
 const kpiCards = [
-    { title: 'Total Students', value: 1248, color: 'from-blue-500 to-cyan-400' },
-    { title: 'Total Teachers', value: 62, color: 'from-purple-500 to-pink-500' },
-    { title: 'Total Classes', value: 38, color: 'from-indigo-500 to-violet-500' },
-    { title: 'Total Courses', value: 54, color: 'from-emerald-500 to-green-400' },
-    { title: 'Assignments', value: 127, color: 'from-orange-500 to-red-500' },
-    { title: 'Pending Requests', value: 9, color: 'from-gray-700 to-gray-500' },
+    { title: 'Total Students', value: props.stats?.total_students ?? 0, color: 'from-blue-500 to-cyan-400' },
+    { title: 'Total Teachers', value: props.stats?.total_teachers ?? 0, color: 'from-purple-500 to-pink-500' },
+    { title: 'Total Classes', value: props.stats?.total_section ?? 0, color: 'from-indigo-500 to-violet-500' },
+    { title: 'Total Courses', value: props.stats?.total_course ?? 0, color: 'from-emerald-500 to-green-400' },
+    { title: 'Assignments', value: props.stats?.total_assignments ?? 0, color: 'from-orange-500 to-red-500' },
+    { title: 'Pending Requests', value: props.stats?.pending_assignment ?? 0, color: 'from-gray-700 to-gray-500' },
+]
+
+const assignment = [
+  {
+    id: 1,
+    title: 'Algebra Homework',
+    subject: 'Mathematics',
+    section: '10-A',
+    teacher: 'Mr. Roy',
+    date: '25 Jan 2026',
+  },
+  {
+    id: 2,
+    title: 'English Essay Writing',
+    subject: 'English',
+    section: '9-B',
+    teacher: 'Ms. Sen',
+    date: '24 Jan 2026',
+  },
+  {
+    id: 3,
+    title: 'Physics Numericals',
+    subject: 'Physics',
+    section: '10-B',
+    teacher: 'Mr. Das',
+    date: '23 Jan 2026',
+  },
+  {
+    id: 4,
+    title: 'History Chapter Test',
+    subject: 'History',
+    section: '8-C',
+    teacher: 'Ms. Gupta',
+    date: '22 Jan 2026',
+  },
 ]
 
 const assignments = [
@@ -77,7 +116,6 @@ const attendanceRows = [
                 <h2 class="mb-4 text-lg font-semibold text-gray-700">
                     System Overview
                 </h2>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                     <div v-for="card in kpiCards" :key="card.title" class="rounded-xl p-4 text-white shadow-lg
                    bg-gradient-to-r transition
@@ -130,6 +168,43 @@ const attendanceRows = [
                     </ul>
                 </div>
             </section>
+            
+            <!-- ================= ANALYTICS ================= -->
+            <section class="bg-white rounded-2xl p-5 shadow">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">New Assignments</h2>
+                    <Link href="/assignments" class="text-sm text-blue-600">
+                    View All
+                    </Link>
+                </div>
+
+                <table class="w-full text-sm">
+                    <thead class="text-gray-500 border-b">
+                        <tr>
+                            <th class="py-2 text-left">Title</th>
+                            <th class="text-start">Subject</th>
+                            <th class="text-start">Section</th>
+                            <th class="text-start">Teacher</th>
+                            <th class="text-start">Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr v-for="a in assignment" :key="a.id" class="border-b">
+                            <td class="py-2 font-medium">{{ a.title }}</td>
+                            <td>{{ a.subject }}</td>
+                            <td>
+                                <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-600">
+                                    {{ a.section }}
+                                </span>
+                            </td>
+                            <td>{{ a.teacher }}</td>
+                            <td class="text-gray-500">{{ a.date }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
 
             <!-- ================= ASSIGNMENTS ================= -->
             <section class="rounded-xl bg-white p-6 shadow">
@@ -139,13 +214,13 @@ const attendanceRows = [
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
-                        <thead class="border-b text-gray-500">
+                        <thead class="border-b  text-gray-500">
                             <tr>
-                                <th class="py-2">Teacher</th>
-                                <th>Subject</th>
-                                <th>Class</th>
-                                <th>Submitted</th>
-                                <th>Pending</th>
+                                <th class="py-2 text-start">Teacher</th>
+                                <th class="text-start">Subject</th>
+                                <th class="text-start">Class</th>
+                                <th class="text-start">Submitted</th>
+                                <th class="text-start">Pending</th>
                             </tr>
                         </thead>
 

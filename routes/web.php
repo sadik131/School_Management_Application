@@ -8,16 +8,18 @@ use App\Http\Controllers\SectionController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentProfileController;
+use App\Http\Controllers\TeacherAssignmentController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\UsersController;
+use App\Models\Course;
+use App\Models\Section;
+use App\Models\Student;
+use App\Models\Teacher;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Laravel\Fortify\Features;
 
 Route::get('/', function () {
-    // return Inertia::render('Welcome', [
-    //     'canRegister' => Features::enabled(Features::registration()),
-    // ]);
     return redirect()->route('login');
 })->name('home');
 
@@ -25,13 +27,43 @@ Route::get('/', function () {
 
 // admin dashboard
 Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
+   return Inertia::render('Dashboard', [
+        'stats' => [
+            'total_students' => Student::count(),
+            'total_teachers' => Teacher::count(),
+            'total_course'    => Course::count(),
+            'total_section'    => Section::count(),
+        ],
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
+Route::post(
+    '/users/{user}/teacher',
+    [UsersController::class, 'storeOrUpdateTeacher']
+)->middleware(['auth', 'role:admin']);
+
+Route::post(
+    '/users/{user}/student',
+    [UsersController::class, 'storeOrUpdateStudent']
+)->name('users.student.store');
+
+
+Route::middleware(['auth', 'role:teacher'])->group(function () {
+    Route::get(
+        '/teacher/assignments/create',
+        [TeacherAssignmentController::class, 'create']
+    )->name('teacher.assignments.create');
+
+    Route::post(
+        '/teacher/assignments',
+        [TeacherAssignmentController::class, 'store']
+    )->name('teacher.assignments.store');
+});
+
+
 // teacherDashbord
-Route::get('/TeacherDash', function () {
-    return Inertia::render('Teacher/Dashboard');
-})->name('TeacherDash');
+Route::get('/TeacherDash',[TeacherDashboardController::class, 'index'])->name('TeacherDash');
 
 // -------------------------------------------------------------------
 
@@ -74,8 +106,7 @@ Route::middleware(['role:admin'])->group(function () {
     Route::resource('permission', PermissionController::class);
     Route::resource('courses', CourseController::class);
     Route::resource('semesters', SemesterController::class);
-        Route::resource('sections', SectionController::class);
-
+    Route::resource('sections', SectionController::class);
 });
 
 require __DIR__.'/settings.php';

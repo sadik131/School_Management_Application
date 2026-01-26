@@ -1,173 +1,147 @@
-<script setup lang="ts">
-import { ref } from 'vue'
+<script setup>
+import { computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { dashboard } from '@/routes'
-import { type BreadcrumbItem } from '@/types'
 import { Head, Link } from '@inertiajs/vue3'
 
-const breadcrumbs: BreadcrumbItem[] = [
+/* ================= BREADCRUMB ================= */
+const breadcrumbs= [
   { title: 'Teacher Dashboard', href: dashboard().url },
 ]
 
-// KPI
-const kpiCards = [
-  { title: 'My Classes', value: 4, color: 'from-blue-500 to-cyan-400' },
-  { title: 'My Subjects', value: 3, color: 'from-purple-500 to-pink-500' },
-  { title: 'Total Assignments', value: 18, color: 'from-indigo-500 to-violet-500' },
-  { title: 'Pending Submissions', value: 27, color: 'from-orange-500 to-red-500' },
-]
-
-// ================= GROUPS =================
-const showGroupForm = ref(false)
-
-const groups = ref([
-  {
-    id: 1,
-    name: 'Class 10-A Science',
-    class: '10-A',
-    students: ['Rahim', 'Karim', 'Ayesha'],
-  },
-])
-
-const newGroup = ref({
-  name: '',
-  class: '',
-  students: '',
+/* ================= PROPS ================= */
+const props = defineProps({
+  stats: Object,
+  myClasses: Array,
 })
 
-const addGroup = () => {
-  groups.value.push({
-    id: Date.now(),
-    name: newGroup.value.name,
-    class: newGroup.value.class,
-    students: newGroup.value.students.split(','),
-  })
-
-  newGroup.value = { name: '', class: '', students: '' }
-  showGroupForm.value = false
-}
-
-// ================= ASSIGNMENTS =================
-const showAssignmentForm = ref(false)
-
-const assignments = ref([
+/* ================= KPI ================= */
+const kpiCards = computed(() => [
   {
-    title: 'Algebra Worksheet',
-    group: 'Class 10-A Science',
-    due: '25 Jan',
+    title: 'My Classes',
+    value: props.stats?.total_sections ?? 0,
+    color: 'from-blue-500 to-cyan-400',
   },
-])
-
-const newAssignment = ref({
-  title: '',
-  group: '',
-  due: '',
-})
-
-const addAssignment = () => {
-  assignments.value.push({ ...newAssignment.value })
-  newAssignment.value = { title: '', group: '', due: '' }
-  showAssignmentForm.value = false
-}
-
-// ================= SCHEDULE =================
-const schedule = ref([
-  { time: '09:00 - 10:00', subject: 'Math', class: '10-A' },
+  {
+    title: 'Total Assignments',
+    value: 18, // dummy
+    color: 'from-indigo-500 to-violet-500',
+  },
+  {
+    title: 'Pending Submissions',
+    value: 27, // dummy
+    color: 'from-orange-500 to-red-500',
+  },
 ])
 </script>
 
-
 <template>
+
   <Head title="Teacher Dashboard" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex flex-col gap-8 p-4">
 
-      <!-- KPI -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div
-          v-for="card in kpiCards"
-          :key="card.title"
-          class="rounded-xl p-4 text-white shadow bg-gradient-to-r"
-          :class="card.color"
-        >
-          <p class="text-sm opacity-80">{{ card.title }}</p>
-          <p class="mt-2 text-3xl font-bold">{{ card.value }}</p>
+      <!-- ================= KPI ================= -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div v-for="card in kpiCards" :key="card.title" class="rounded-xl p-4 text-white shadow bg-gradient-to-r"
+          :class="card.color">
+          <p class="text-sm opacity-80">
+            {{ card.title }}
+          </p>
+          <p class="mt-2 text-3xl font-bold">
+            {{ card.value }}
+          </p>
         </div>
       </div>
+{{ myClasses }}
+      <div class="flex w-full gap-4 ">
+        <div class="rounded-xl bg-white shadow w-full h-[50vh] overflow-y-scroll">
+          <div class="sticky top-0 z-20 border-b px-4 py-3">
+            <h2 class="text-sm font-semibold text-gray-700">
+              Teaching Overview
+            </h2>
+          </div>
 
-      <!-- ================= GROUPS ================= -->
-      <div class="rounded-xl bg-white p-6 shadow">
-        <div class="mb-4 flex justify-between">
-          <h2 class="text-xl font-semibold">My Groups</h2>
-          <button
-            @click="showGroupForm = !showGroupForm"
-            class="rounded-lg bg-blue-600 px-4 py-2 text-white"
-          >
-            ➕ Create Group
-          </button>
-        </div>
+          <div class="overflow-x-auto h-[calc(50vh-48px)]">
+            <table class="w-full text-sm">
+              <thead class="sticky top-0 z-10 bg-gray-50 text-gray-600">
+                <tr>
+                  <th class="px-4 py-3 text-left font-medium">Course</th>
+                  <th class="px-4 py-3 text-left font-medium">Semester</th>
+                  <th class="px-4 py-3 text-left font-medium">Section</th>
+                  <th class="px-4 py-3 text-right font-medium">Students</th>
+                </tr>
+              </thead>
 
-        <div v-if="showGroupForm" class="mb-4 space-y-2">
-          <input v-model="newGroup.name" placeholder="Group Name" class="w-full border p-2 rounded" />
-          <input v-model="newGroup.class" placeholder="Class" class="w-full border p-2 rounded" />
-          <input v-model="newGroup.students" placeholder="Students (Rahim,Karim)" class="w-full border p-2 rounded" />
-          <button @click="addGroup" class="w-full bg-green-600 text-white py-2 rounded">
-            Save Group
-          </button>
-        </div>
+              <tbody class="divide-y">
+                <tr v-for="section in myClasses" :key="section.id" class="hover:bg-gray-50">
+                  <td class="px-4 py-3">
+                    {{ section.semester.course.name }}
+                  </td>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div
-            v-for="g in groups"
-            :key="g.id"
-            class="rounded-lg border p-4"
-          >
-            <h3 class="font-semibold">{{ g.name }}</h3>
-            <p class="text-sm text-gray-500">Class: {{ g.class }}</p>
-            <p class="text-sm text-gray-500">Students: {{ g.students.length }}</p>
+                  <td class="px-4 py-3">
+                    {{ section.semester.name }}
+                  </td>
+
+                  <td class="px-4 py-3">
+                    {{ section.name }}
+                  </td>
+
+                  <td class="px-4 py-3 text-right text-gray-600">
+                    {{ section.capacity }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
 
-      <!-- ================= ASSIGNMENTS ================= -->
-      <div class="rounded-xl bg-white p-6 shadow">
-        <div class="mb-4 flex justify-between">
-          <h2 class="text-xl font-semibold">Assignments (Group-wise)</h2>
-          <button
-            @click="showAssignmentForm = !showAssignmentForm"
-            class="rounded-lg bg-purple-600 px-4 py-2 text-white"
-          >
-            ➕ Create Assignment
-          </button>
+        <div class="rounded-xl bg-white shadow w-full h-[50vh] overflow-y-scroll">
+          <div class="sticky top-0 z-20 border-b px-4 py-3">
+            <h2 class="text-sm font-semibold text-gray-700">
+              Assignment Overview
+            </h2>
+          </div>
+
+          <div class="h-[calc(50vh-48px)] overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="sticky top-0 z-10 bg-gray-50 text-gray-600">
+                <tr>
+                  <th class="px-4 py-3 text-left font-medium">Class</th>
+                  <th class="px-4 py-3 text-center font-medium">Submitted</th>
+                  <th class="px-4 py-3 text-center font-medium">Pending</th>
+                  <th class="px-4 py-3 text-right font-medium">Action</th>
+                </tr>
+              </thead>
+
+              <tbody class="divide-y">
+                <tr v-for="section in myClasses" :key="section.id" class="hover:bg-gray-50">
+                  <td class="px-4 py-3">
+                    {{ section.semester.course.name }}
+                    · {{ section.semester.name }}
+                    · {{ section.name }}
+                  </td>
+
+                  <td class="px-4 py-3 text-center font-medium">
+                    32
+                  </td>
+
+                  <td class="px-4 py-3 text-center font-medium text-red-600">
+                    8
+                  </td>
+
+                  <td class="px-4 py-3 text-right">
+                    <Link :href="`/teacher/assignments/create?section=${section.id}`"
+                      class="text-indigo-600 hover:underline text-sm">
+                      Create
+                    </Link>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-
-        <div v-if="showAssignmentForm" class="mb-4 space-y-2">
-          <input v-model="newAssignment.title" placeholder="Assignment Title" class="w-full border p-2 rounded" />
-          <select v-model="newAssignment.group" class="w-full border p-2 rounded">
-            <option value="">Select Group</option>
-            <option v-for="g in groups" :key="g.id" :value="g.name">
-              {{ g.name }}
-            </option>
-          </select>
-          <input v-model="newAssignment.due" placeholder="Due Date" class="w-full border p-2 rounded" />
-          <button @click="addAssignment" class="w-full bg-green-600 text-white py-2 rounded">
-            Save Assignment
-          </button>
-        </div>
-
-        <ul class="space-y-2">
-          <li
-            v-for="a in assignments"
-            :key="a.title"
-            class="rounded border p-3"
-          >
-            <b>{{ a.title }}</b>  
-            <div class="text-sm text-gray-500">
-              Group: {{ a.group }} | Due: {{ a.due }}
-            </div>
-          </li>
-        </ul>
       </div>
 
     </div>

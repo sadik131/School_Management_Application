@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Section extends Model
 {
@@ -16,5 +17,15 @@ class Section extends Model
     public function students()
     {
         return $this->hasMany(Student::class);
+    }
+
+    public function teachers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Teacher::class,
+            'section_teacher',
+            'section_id',
+            'teacher_id'
+        );
     }
 }

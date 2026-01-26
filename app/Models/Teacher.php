@@ -12,8 +12,8 @@ class Teacher extends Model
 
     protected $fillable = [
         'user_id',
-        'department',
         'designation',
+        'department',
         'qualification',
         'experience',
     ];
@@ -27,5 +27,15 @@ class Teacher extends Model
     public function activity()
     {
         return $this->hasOne(TeacherActivity::class);
+    }
+
+    public function sections()
+    {
+        return $this->belongsToMany(
+            Section::class,
+            'section_teacher', 
+            'teacher_id',
+            'section_id'
+        );
     }
 }

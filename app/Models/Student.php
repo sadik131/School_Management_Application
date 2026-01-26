@@ -26,6 +26,11 @@ class Student extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function section()
+    {
+        return $this->belongsTo(Section::class);
+    }
+    
     public function activity()
     {
         return $this->hasOne(StudentActivity::class);
