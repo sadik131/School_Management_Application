@@ -120,7 +120,7 @@ const attendanceRows = [
                 </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                     <div v-for="card in kpiCards" :key="card.title" class="rounded-xl p-4 text-white shadow-lg
-                   bg-gradient-to-r transition
+                   bg-linear-to-r transition
                    hover:-translate-y-1 hover:shadow-xl" :class="card.color">
                         <p class="text-sm opacity-80">{{ card.title }}</p>
                         <p class="mt-2 text-3xl font-bold">{{ card.value }}</p>

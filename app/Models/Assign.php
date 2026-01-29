@@ -3,6 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Teacher;
+use App\Models\AssignmentSubmission;
+use App\Models\Section;
+
 
 class Assign extends Model
 {

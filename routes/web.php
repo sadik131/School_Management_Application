@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AIController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
@@ -126,3 +127,7 @@ Route::get(
 
 
 Route::resource('/Student/dashboard',StudentAssignmentController::class);
+
+// talk with AI
+Route::post('/ai/chat', [AIController::class, 'chat'])
+    ->middleware('auth');

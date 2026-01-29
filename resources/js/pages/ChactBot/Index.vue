@@ -3,6 +3,8 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { dashboard } from '@/routes'
 import { Head } from '@inertiajs/vue3'
 import { ref, nextTick } from 'vue'
+import axios from 'axios'
+
 
 const breadcrumbs = [
   {
@@ -38,17 +40,26 @@ const sendMessage = async () => {
   await nextTick()
   chatBox.value.scrollTop = chatBox.value.scrollHeight
 
-  // Dummy AI response
-  setTimeout(async () => {
-    messages.value.push({
-      from: 'ai',
-      text: `🤖 AI Response: I received your message — "${userText}". This is a dummy reply for now.`,
+  try {
+    const res = await axios.post('/ai/chat', {
+      question: userText,
     })
 
-    await nextTick()
-    chatBox.value.scrollTop = chatBox.value.scrollHeight
-  }, 600)
+    messages.value.push({
+      from: 'ai',
+      text: res.data.text,
+    })
+  } catch (error) {
+    messages.value.push({
+      from: 'ai',
+      text: '⚠️ Something went wrong. Please try again.',
+    })
+  }
+
+  await nextTick()
+  chatBox.value.scrollTop = chatBox.value.scrollHeight
 }
+
 </script>
 
 <template>
