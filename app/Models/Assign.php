@@ -3,10 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Teacher;
-use App\Models\AssignmentSubmission;
-use App\Models\Section;
-
 
 class Assign extends Model
 {
@@ -16,6 +12,11 @@ class Assign extends Model
         'title',
         'description',
         'due_date',
+    ];
+    
+    protected $appends = [
+        'submitted_count',
+        'total_students',
     ];
 
     public function section()
@@ -27,8 +28,21 @@ class Assign extends Model
     {
         return $this->belongsTo(Teacher::class);
     }
+
     public function submissions()
     {
         return $this->hasMany(AssignmentSubmission::class, 'assignment_id');
+    }
+
+    public function getSubmittedCountAttribute()
+    {
+        return $this->submissions()->count();
+    }
+
+    public function getTotalStudentsAttribute()
+    {
+        return $this->section
+            ? $this->section->students()->count()
+            : 0;
     }
 }

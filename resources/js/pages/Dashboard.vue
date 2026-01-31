@@ -1,12 +1,115 @@
-<script setup lang="ts">
+<script setup>
 import AppLayout from '@/layouts/AppLayout.vue'
 import { dashboard } from '@/routes'
-import { type BreadcrumbItem } from '@/types'
-import { Head } from '@inertiajs/vue3'
+import { Head,Link } from '@inertiajs/vue3'
+import { ref, onMounted } from 'vue'
+import Chart from 'chart.js/auto'
+import { nextTick } from 'vue'
 
-const breadcrumbs: BreadcrumbItem[] = [
+const breadcrumbs = [
     { title: 'Admin Dashboard', href: dashboard().url },
 ]
+
+
+const chartRef = ref(null)
+
+onMounted(async () => {
+
+    const assignments = props.stats?.assignment ?? []
+
+const labels = assignments.map(a => a.title)
+
+const submittedData = assignments.map(a => a.submitted_count ?? 0)
+
+const pendingData = assignments.map(a =>
+  Math.max(0, (a.total_students ?? 0) - (a.submitted_count ?? 0))
+)
+
+
+  await nextTick()
+  if (!chartRef.value) return
+
+  const ctx = chartRef.value.getContext('2d')
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels:labels,
+      datasets: [
+        {
+          label: 'Submitted',
+          data: submittedData,
+          backgroundColor: 'rgba(34,197,94,0.85)',
+          hoverBackgroundColor: 'rgba(34,197,94,1)',
+          borderRadius: 10,          
+          barThickness: 28,
+        },
+        {
+          label: 'Pending',
+          data: pendingData,
+          backgroundColor: 'rgba(239,68,68,0.85)',
+          hoverBackgroundColor: 'rgba(239,68,68,1)',
+          borderRadius: 10,
+          barThickness: 28,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 1200,
+        easing: 'easeOutQuart',    
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            usePointStyle: true,    
+            padding: 20,
+            font: {
+              size: 13,
+              weight: '600',
+            },
+          },
+        },
+        tooltip: {
+          backgroundColor: '#111827',
+          titleColor: '#fff',
+          bodyColor: '#e5e7eb',
+          padding: 12,
+          cornerRadius: 8,         
+        },
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false,         
+          },
+          ticks: {
+            font: {
+              size: 12,
+              weight: '500',
+            },
+          },
+        },
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0,0,0,0.05)', // 🔥 soft grid
+          },
+          ticks: {
+            stepSize: 5,
+            font: {
+              size: 12,
+            },
+          },
+        },
+      },
+    },
+  })
+})
+
 
 const props = defineProps({
     stats: Object
@@ -21,59 +124,6 @@ const kpiCards = [
     { title: 'Pending Requests', value: props.stats?.pending_assignment ?? 0, color: 'from-gray-700 to-gray-500' },
 ]
 
-{{props.stats}}
-
-const assignment = [
-  {
-    id: 1,
-    title: 'Algebra Homework',
-    subject: 'Mathematics',
-    section: '10-A',
-    teacher: 'Mr. Roy',
-    date: '25 Jan 2026',
-  },
-  {
-    id: 2,
-    title: 'English Essay Writing',
-    subject: 'English',
-    section: '9-B',
-    teacher: 'Ms. Sen',
-    date: '24 Jan 2026',
-  },
-  {
-    id: 3,
-    title: 'Physics Numericals',
-    subject: 'Physics',
-    section: '10-B',
-    teacher: 'Mr. Das',
-    date: '23 Jan 2026',
-  },
-  {
-    id: 4,
-    title: 'History Chapter Test',
-    subject: 'History',
-    section: '8-C',
-    teacher: 'Ms. Gupta',
-    date: '22 Jan 2026',
-  },
-]
-
-const assignments = [
-    {
-        teacher: 'Mr. Roy',
-        subject: 'Math',
-        class: '10-A',
-        submitted: 42,
-        pending: 3,
-    },
-    {
-        teacher: 'Ms. Sen',
-        subject: 'English',
-        class: '9-B',
-        submitted: 38,
-        pending: 9,
-    },
-]
 
 const attendanceRows = [
     {
@@ -118,6 +168,7 @@ const attendanceRows = [
                 <h2 class="mb-4 text-lg font-semibold text-gray-700">
                     System Overview
                 </h2>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                     <div v-for="card in kpiCards" :key="card.title" class="rounded-xl p-4 text-white shadow-lg
                    bg-linear-to-r transition
@@ -137,10 +188,8 @@ const attendanceRows = [
                         Student Growth Analytics
                     </h2>
 
-                    <div class="flex h-56 items-center justify-center
-                   rounded-lg border-2 border-dashed
-                   text-gray-400">
-                        📊 Analytics Chart (Dummy)
+                    <div style="height:300px">
+                        <canvas ref="chartRef"></canvas>
                     </div>
                 </div>
 
@@ -170,7 +219,7 @@ const attendanceRows = [
                     </ul>
                 </div>
             </section>
-            
+
             <!-- ================= ANALYTICS ================= -->
             <section class="bg-white rounded-2xl p-5 shadow">
                 <div class="flex justify-between items-center mb-4">
@@ -187,26 +236,26 @@ const attendanceRows = [
                             <th class="text-start">Subject</th>
                             <th class="text-start">Section</th>
                             <th class="text-start">Teacher</th>
-                            <th class="text-start">Date</th>
+                            <th class="text-start">Due Date</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        <tr v-for="a in assignment" :key="a.id" class="border-b">
+                        <tr v-for="a in props.stats?.assignment" :key="a.id" class="border-b">
                             <td class="py-2 font-medium">{{ a.title }}</td>
-                            <td>{{ a.subject }}</td>
+                            <td>{{ a.teacher.department }}</td>
                             <td>
                                 <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-600">
-                                    {{ a.section }}
+                                    {{ a.section.name }}
                                 </span>
                             </td>
-                            <td>{{ a.teacher }}</td>
-                            <td class="text-gray-500">{{ a.date }}</td>
+                            <td>{{ a.teacher.user.name }}</td>
+                            <td class="text-gray-500">{{ a.due_date }}</td>
+
                         </tr>
                     </tbody>
                 </table>
             </section>
-
 
             <!-- ================= ASSIGNMENTS ================= -->
             <section class="rounded-xl bg-white p-6 shadow">
@@ -220,32 +269,36 @@ const attendanceRows = [
                             <tr>
                                 <th class="py-2 text-start">Teacher</th>
                                 <th class="text-start">Subject</th>
-                                <th class="text-start">Class</th>
+                                <th class="text-start">Section</th>
+                                <th class="text-start">Total Student</th>
                                 <th class="text-start">Submitted</th>
                                 <th class="text-start">Pending</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            <tr v-for="row in assignments" :key="row.teacher"
+                            <tr v-for="row in props.stats?.assignment ?? []" :key="row.teacher"
                                 class="border-b last:border-0 hover:bg-gray-50">
-                                <td class="py-3 font-medium">{{ row.teacher }}</td>
-                                <td>{{ row.subject }}</td>
+                                <td class="py-3 font-medium">{{ row.teacher.user.name }}</td>
+                                <td>{{ row.teacher.department }}</td>
+
                                 <td>
                                     <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs text-indigo-700">
-                                        {{ row.class }}
+                                        {{ row.section.semester.number }}
+                                        {{ row.section.name }}
                                     </span>
                                 </td>
-                                <td>{{ row.submitted }}</td>
+                                <td>{{ row.total_students }}</td>
+                                <td>{{ row.submitted_count }}</td>
                                 <td class="font-semibold text-red-500">
-                                    {{ row.pending }}
+                                {{ Math.max(0, row.total_students - row.submitted_count) }}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    <!-- {{ row }} -->
                 </div>
             </section>
-
             <!-- ================= ATTENDANCE MONITORING ================= -->
             <div class="rounded-xl bg-white p-6 shadow">
                 <h2 class="mb-4 text-xl font-semibold">

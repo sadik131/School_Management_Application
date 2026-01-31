@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assign;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,14 +14,14 @@ class TeacherDashboardController extends Controller
 
         // 🔐 ensure teacher exists
         $teacher = $user->teacher;
-
+        $totalAssignments = Assign::where('teacher_id', $teacher->id)->count();
         $sections = $teacher
             ? $teacher->sections()
                 ->with([
                     'semester.course',
-                    'students',        // 🔥 only students of THIS section
+                    'students',
                 ])
-                ->withCount('students') // 🔥 student count per section
+                ->withCount('students')
                 ->get()
             : collect();
 
@@ -28,6 +29,7 @@ class TeacherDashboardController extends Controller
             'stats' => [
                 'total_sections' => $sections->count(),
                 'total_students' => $sections->sum('students_count'),
+                'total_assignments' => $totalAssignments,
             ],
             'myClasses' => $sections,
         ]);

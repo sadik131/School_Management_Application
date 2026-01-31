@@ -25,6 +25,7 @@ class UsersController extends Controller
                 'student.activity',
                 'teacher.sections.semester.course',
                 'teacher.activity',
+                'teacher.assignments',
             ])
 
             // 🔍 Name / Email search

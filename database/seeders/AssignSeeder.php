@@ -17,7 +17,7 @@ class AssignSeeder extends Seeder
         $teachers = Teacher::all();
         $sections = Section::all();
 
-        for ($i = 1; $i <= 15; $i++) {
+        for ($i = 1; $i <= 5; $i++) {
             Assign::create([
                 'teacher_id' => $teachers->random()->id,
                 'section_id' => $sections->random()->id,

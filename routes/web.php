@@ -37,6 +37,8 @@ Route::get('dashboard', function () {
             'total_course' => Course::count(),
             'total_section' => Section::count(),
             'total_assignments'=> Assign::count(),
+            'assignment'=> Assign::with("teacher","teacher.user",'section','section.semester')->latest()->take(5)->get(),
+            
         ],
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');

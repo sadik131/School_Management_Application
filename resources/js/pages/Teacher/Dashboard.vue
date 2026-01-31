@@ -50,8 +50,8 @@ const kpiCards = computed(() => [
     color: 'from-indigo-500 to-violet-500',
   },
   {
-    title: 'Courses I Teach',
-    value: totalCourses.value,
+    title: 'Total Assignment',
+    value: props.stats?.total_assignments ,
     color: 'from-emerald-500 to-teal-400',
   },
   {
