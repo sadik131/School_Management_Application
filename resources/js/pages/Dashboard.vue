@@ -15,7 +15,7 @@ const props = defineProps({
 const kpiCards = [
     { title: 'Total Students', value: props.stats?.total_students ?? 0, color: 'from-blue-500 to-cyan-400' },
     { title: 'Total Teachers', value: props.stats?.total_teachers ?? 0, color: 'from-purple-500 to-pink-500' },
-    { title: 'Total Classes', value: props.stats?.total_section ?? 0, color: 'from-indigo-500 to-violet-500' },
+    { title: 'Total Sections', value: props.stats?.total_section ?? 0, color: 'from-indigo-500 to-violet-500' },
     { title: 'Total Courses', value: props.stats?.total_course ?? 0, color: 'from-emerald-500 to-green-400' },
     { title: 'Assignments', value: props.stats?.total_assignments ?? 0, color: 'from-orange-500 to-red-500' },
     { title: 'Pending Requests', value: props.stats?.pending_assignment ?? 0, color: 'from-gray-700 to-gray-500' },

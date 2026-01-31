@@ -19,6 +19,7 @@ const form = useForm({
     name: '',
     email: '',
     password: '',
+    status:false,
     roles:[]
 })
 

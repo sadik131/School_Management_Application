@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { dashboard } from '@/routes'
 import { Head, Link } from '@inertiajs/vue3'
+import { BookMinus, Eye, Trash } from 'lucide-vue-next'
 
 /* ================= BREADCRUMB ================= */
 const breadcrumbs = [
@@ -75,7 +76,7 @@ const kpiCards = computed(() => [
 
       <!-- ================= KPI ================= -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="card in kpiCards" :key="card.title" class="rounded-xl p-4 text-white shadow bg-gradient-to-r"
+        <div v-for="card in kpiCards" :key="card.title" class="rounded-xl p-4 text-white shadow bg-linear-to-r"
           :class="card.color">
           <p class="text-sm opacity-80">
             {{ card.title }}
@@ -102,7 +103,7 @@ const kpiCards = computed(() => [
               <tr>
                 <th class="px-4 py-3 text-left font-medium">Class</th>
                 <th class="px-4 py-3 text-center font-medium">Total Students</th>
-                <th class="px-4 py-3 text-right font-medium">Action</th>
+                <th class="px-4 py-3 text-center font-medium">Action</th>
               </tr>
             </thead>
 
@@ -117,13 +118,21 @@ const kpiCards = computed(() => [
                 <td class="px-4 py-3 text-center font-semibold">
                   {{ section.students_count ?? section.students.length }}
                 </td>
-
-                <td class="px-4 py-3 text-right">
-                  <Link :href="`/teacher/assignments/create?section=${section.id}`"
-                    class="text-indigo-600 hover:underline text-sm font-medium">
-                    Create Assignment
+                <td class="flex gap-2 px-4 py-3 text-right">
+                  <Link :href="`/teacher/section/${section.id}`"
+                    class="text-yellow-600 hover:underline font-medium">
+                    <Eye class="w-5 h-5" />
                   </Link>
+                  <Link :href="`/teacher/assignments/create?section=${section.id}`"
+                    class="text-indigo-600 hover:underline font-medium">
+                    <BookMinus class="w-5 h-5" />
+                  </Link>
+                  <!-- <Link :href="`/teacher/assignments/create?section=${section.id}`"
+                    class="text-red-600 hover:underline font-medium">
+                    <Trash class="w-5 h-5"/> 
+                  </Link> -->
                 </td>
+                
               </tr>
 
               <tr v-if="!myClasses.length">

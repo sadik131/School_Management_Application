@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\Course;
 use App\Models\Section;
 use App\Models\Semester;
-use App\Models\Course;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -20,22 +19,29 @@ class SectionController extends Controller
         ]);
     }
 
-public function create()
-{
-    return Inertia::render('section/Create', [
-        'courses' => Course::with('semesters')
-            ->where('status', true)
-            ->get(),
-    ]);
-}
+    public function show($id)
+    {
+        return Inertia::render('studentList/Index',[
+            'list'=>Section::with(['students','students.user'])->findOrFail($id)
+        ]);
+    }
+
+    public function create()
+    {
+        return Inertia::render('section/Create', [
+            'courses' => Course::with('semesters')
+                ->where('status', true)
+                ->get(),
+        ]);
+    }
 
     public function store(Request $request)
     {
         $request->validate([
             'semester_id' => 'required|exists:semesters,id',
-            'name'        => 'required|string|max:10',
-            'capacity'    => 'nullable|integer|min:1',
-            'status'      => 'boolean',
+            'name' => 'required|string|max:10',
+            'capacity' => 'nullable|integer|min:1',
+            'status' => 'boolean',
         ]);
 
         Section::create($request->only(
@@ -49,26 +55,25 @@ public function create()
     }
 
     public function edit(Section $section)
-{
-    return Inertia::render('section/Edit', [
-        'section'   => $section,
-        'courses'   => Course::with('semesters')
-            ->where('status', true)
-            ->get(),
-        'semesters' => Semester::with('course')
-            ->where('status', true)
-            ->get(),
-    ]);
-}
-
+    {
+        return Inertia::render('section/Edit', [
+            'section' => $section,
+            'courses' => Course::with('semesters')
+                ->where('status', true)
+                ->get(),
+            'semesters' => Semester::with('course')
+                ->where('status', true)
+                ->get(),
+        ]);
+    }
 
     public function update(Request $request, Section $section)
     {
         $request->validate([
             'semester_id' => 'required|exists:semesters,id',
-            'name'        => 'required|string|max:10',
-            'capacity'    => 'nullable|integer|min:1',
-            'status'      => 'boolean',
+            'name' => 'required|string|max:10',
+            'capacity' => 'nullable|integer|min:1',
+            'status' => 'boolean',
         ]);
 
         $section->update($request->only(
@@ -84,6 +89,7 @@ public function create()
     public function destroy(Section $section)
     {
         $section->delete();
+
         return redirect()->back();
     }
 }

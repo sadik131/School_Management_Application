@@ -99,6 +99,8 @@ Route::get('/teacher/assignments/check', function () {
     return Inertia::render('Teacher/Assignments/Check');
 })->name('teacher.assignments.check');
 
+Route::get("/teacher/section/{id}",[SectionController::class,"show"])->name('teacher.section.show');
+
 // -------------------------------------------------------------------
 
 Route::middleware(['role:admin'])->group(function () {
