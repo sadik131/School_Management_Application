@@ -1,0 +1,21 @@
+<?php
+namespace App\Services;
+use App\Models\Course;
+
+class CourseService
+{
+    public function getAll(){
+        return Course::latest()->get();
+    }
+    public function store(array $data)
+    {
+        return Course::create($data);
+    }
+
+    public function update(Course $course, array $data){
+        return $course->update($data);
+    }
+    public function delete(Course $course){
+        return $course->delete();
+    }
+}

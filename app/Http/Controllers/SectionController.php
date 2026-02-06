@@ -2,27 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SectionRequest;
 use App\Models\Course;
 use App\Models\Section;
 use App\Models\Semester;
+use App\Services\SectionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SectionController extends Controller
 {
+    public function __construct(protected SectionService $sectionService) {}
+
     public function index()
     {
         return Inertia::render('section/Index', [
-            'sections' => Section::with('semester.course')
-                ->latest()
-                ->get(),
+            'sections' => $this->sectionService->getAll(),
         ]);
     }
 
     public function show($id)
     {
-        return Inertia::render('studentList/Index',[
-            'list'=>Section::with(['students','students.user'])->findOrFail($id)
+        return Inertia::render('studentList/Index', [
+            'list' => Section::with(['students', 'students.user'])->findOrFail($id),
         ]);
     }
 
@@ -35,21 +37,10 @@ class SectionController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(SectionRequest $request)
     {
-        $request->validate([
-            'semester_id' => 'required|exists:semesters,id',
-            'name' => 'required|string|max:10',
-            'capacity' => 'nullable|integer|min:1',
-            'status' => 'boolean',
-        ]);
 
-        Section::create($request->only(
-            'semester_id',
-            'name',
-            'capacity',
-            'status'
-        ));
+        $this->sectionService->create($request->validated());
 
         return redirect()->route('sections.index');
     }
@@ -69,19 +60,7 @@ class SectionController extends Controller
 
     public function update(Request $request, Section $section)
     {
-        $request->validate([
-            'semester_id' => 'required|exists:semesters,id',
-            'name' => 'required|string|max:10',
-            'capacity' => 'nullable|integer|min:1',
-            'status' => 'boolean',
-        ]);
-
-        $section->update($request->only(
-            'semester_id',
-            'name',
-            'capacity',
-            'status'
-        ));
+        $this->sectionService->create($request->validated());
 
         return redirect()->route('sections.index');
     }

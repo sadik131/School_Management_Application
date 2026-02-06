@@ -21,7 +21,7 @@ class StudentController extends Controller
         ]);
 
         $user->student()->updateOrCreate(
-            ['user_id' => $user->id], // 🔑 FIX
+            ['user_id' => $user->id], 
             $data
         );
 

@@ -94,7 +94,7 @@ const kpiCards = computed(() => [
         <div class="rounded-xl bg-white shadow w-full h-[50vh] overflow-y-auto">
           <div class="sticky top-0 z-20 border-b px-4 py-3 bg-white">
             <h2 class="text-sm font-semibold text-gray-700">
-              Assignment Overview
+              Class Overview
             </h2>
           </div>
 
@@ -148,7 +148,7 @@ const kpiCards = computed(() => [
         <div class="rounded-xl bg-white shadow w-full h-[50vh] overflow-y-auto">
           <div class="sticky top-0 z-20 border-b px-4 py-3 bg-white">
             <h2 class="text-sm font-semibold text-gray-700">
-              Teaching Overview
+              Assignment Overview
             </h2>
           </div>
 
@@ -178,7 +178,6 @@ const kpiCards = computed(() => [
 
                 <td class="px-4 py-3 text-left text-red-400 font-semibold">
                   0
-
                 </td>
               </tr>
 

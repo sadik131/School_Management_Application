@@ -29,10 +29,10 @@ const checkSubmission = (s: any) => {
       <table class="w-full text-sm">
         <thead class="border-b text-gray-500">
           <tr>
-            <th>Student</th>
-            <th>Status</th>
-            <th>Marks</th>
-            <th>Action</th>
+            <th class="text-left">Student</th>
+            <th class="text-left">Status</th>
+            <th class="text-left">Marks</th>
+            <th class="text-left">Action</th>
           </tr>
         </thead>
 
@@ -47,8 +47,8 @@ const checkSubmission = (s: any) => {
             <td>
               <span
                 :class="s.status === 'Checked'
-                  ? 'text-green-600'
-                  : 'text-orange-500'"
+                  ? 'text-green-600 bg-green-300 py-1 px-2 text-xs rounded-full'
+                  : 'text-orange-500 text-xs'"
               >
                 {{ s.status }}
               </span>

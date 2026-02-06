@@ -2,20 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PermissionRequest;
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
 
 class PermissionController extends Controller
 {
+    public function __construct(private PermissionService $permissionService){}
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $permission = Permission::all();
-        return Inertia::render('permission/Index',[
-            'permissions' => $permission
+
+        return Inertia::render('permission/Index', [
+            'permissions' => $permission,
         ]);
     }
 
@@ -29,20 +33,13 @@ class PermissionController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     */public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|unique:permissions,name',
-        'description' => 'nullable|string|max:255',
-    ]);
-    Permission::create([
-        'name' => $request->name,
-        'description' => $request->description,
-        ]);
-        // dd($request);
+     */
+    public function store(PermissionRequest $request)
+    {
+       $this->permissionService->create($request->validated());
 
-    return redirect()->route('permission.index');
-}
+        return redirect()->route('permission.index');
+    }
 
     /**
      * Display the specified resource.

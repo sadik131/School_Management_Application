@@ -25,12 +25,13 @@ const mainNavItems = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+        roles: ['admin']
     },
     {
         title: 'TeacherDash',
         href: "/TeacherDash",
         icon: CircleUserRound,
-        roles: ['teacher', 'admin'],
+        roles: ['teacher'],
     },
     {
         title: 'Users',

@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Semester;
+use App\Http\Requests\SemisterRequest;
 use App\Models\Course;
-use Illuminate\Http\Request;
+use App\Models\Semester;
+use App\Services\SemesterService;
 use Inertia\Inertia;
 
 class SemesterController extends Controller
 {
+    public function __construct(protected SemesterService $semesterService) {}
+
     public function index()
     {
         return Inertia::render('semester/Index', [
-            'semesters' => Semester::with('course')
-                ->latest()
-                ->get(),
+            'semesters' => $this->semesterService->getAll(),
         ]);
     }
 
@@ -26,21 +26,9 @@ class SemesterController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(SemisterRequest $request)
     {
-        $request->validate([
-            'course_id' => 'required|exists:courses,id',
-            'number'    => 'required|integer|min:1',
-            'name'      => 'required|string|max:255',
-            'status'    => 'boolean',
-        ]);
-
-        Semester::create($request->only(
-            'course_id',
-            'number',
-            'name',
-            'status'
-        ));
+        $this->semesterService->create($request->validated());
 
         return redirect()->route('semesters.index');
     }
@@ -49,32 +37,20 @@ class SemesterController extends Controller
     {
         return Inertia::render('semester/Edit', [
             'semester' => $semester,
-            'courses'  => Course::where('status', true)->get(),
+            'courses' => Course::where('status', true)->get(),
         ]);
     }
 
-    public function update(Request $request, Semester $semester)
+    public function update(SemisterRequest $request, Semester $semester)
     {
-        $request->validate([
-            'course_id' => 'required|exists:courses,id',
-            'number'    => 'required|integer|min:1',
-            'name'      => 'required|string|max:255',
-            'status'    => 'boolean',
-        ]);
-
-        $semester->update($request->only(
-            'course_id',
-            'number',
-            'name',
-            'status'
-        ));
+        $this->semesterService->update($semester, $request->validated());
 
         return redirect()->route('semesters.index');
     }
 
     public function destroy(Semester $semester)
     {
-        $semester->delete();
+        $this->semesterService->delete($semester);
 
         return redirect()->back();
     }

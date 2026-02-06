@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Http\Requests\CourseRequest;
 use App\Models\Course;
-use Illuminate\Http\Request;
+use App\Services\CourseService;
 use Inertia\Inertia;
 
 class CourseController extends Controller
 {
+    public function __construct(private CourseService $courseService) {}
+
     /**
      * Display a listing of the courses.
      */
     public function index()
     {
         return Inertia::render('course/Index', [
-            'courses' => Course::latest()->get(),
+            'courses' => $this->courseService->getAll(),
         ]);
     }
 
@@ -30,19 +32,9 @@ class CourseController extends Controller
     /**
      * Store a newly created course in storage.
      */
-    public function store(Request $request)
+    public function store(CourseRequest $request)
     {
-        $request->validate([
-            'name'   => 'required|string|max:255',
-            'code'   => 'nullable|string|max:50',
-            'status' => 'boolean',
-        ]);
-
-        Course::create([
-            'name'   => $request->name,
-            'code'   => $request->code,
-            'status' => $request->status ?? true,
-        ]);
+        $this->courseService->store($request->validated());
 
         return redirect()
             ->route('courses.index')
@@ -62,19 +54,9 @@ class CourseController extends Controller
     /**
      * Update the specified course in storage.
      */
-    public function update(Request $request, Course $course)
+    public function update(CourseRequest $request, Course $course)
     {
-        $request->validate([
-            'name'   => 'required|string|max:255',
-            'code'   => 'nullable|string|max:50',
-            'status' => 'boolean',
-        ]);
-
-        $course->update([
-            'name'   => $request->name,
-            'code'   => $request->code,
-            'status' => $request->status,
-        ]);
+        $this->courseService->update($course, $request->validated());
 
         return redirect()
             ->route('courses.index')
@@ -86,7 +68,7 @@ class CourseController extends Controller
      */
     public function destroy(Course $course)
     {
-        $course->delete();
+        $this->courseService->delete($course);
 
         return redirect()
             ->back()

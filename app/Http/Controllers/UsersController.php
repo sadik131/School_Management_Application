@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StudentAssignRequest;
+use App\Http\Requests\TeacherAssignRequest;
+use App\Http\Requests\UserCreateRequest;
 use App\Models\Section;
 use App\Models\Student;
 use App\Models\Teacher;
@@ -71,14 +74,9 @@ class UsersController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(UserCreateRequest $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-            'roles' => 'required|array',
-        ]);
+        $data = $request->validated();
 
         // 🔐 password hash
         $data['password'] = Hash::make($data['password']);
@@ -127,8 +125,10 @@ class UsersController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UserCreateRequest $request, string $id)
     {
+        $data = $request->validated();
+
         $user = User::findOrFail($id);
 
         $data = $request->validate([
@@ -159,22 +159,14 @@ class UsersController extends Controller
         return redirect()->route('users.index');
     }
 
-    public function storeOrUpdateTeacher(Request $request, User $user)
+    public function storeOrUpdateTeacher(TeacherAssignRequest $request, User $user)
     {
-        $validated = $request->validate([
-            'teacher_id'   => 'required|integer',
-            'department' => 'required|string',
-            'designation' => 'required|string',
-            'qualification' => 'required|string',
-            'experience' => 'required|string',
-            'sections' => ['required', 'array'],
-            'sections.*' => ['integer', 'exists:sections,id'],
-        ]);
-        // 🔎 create or get teacher
+        $validated = $request->validated();
+        //  create or get teacher
         $teacher = Teacher::updateOrCreate(
             ['user_id' => $user->id],
             [
-                'teacher_id'   => $validated['teacher_id'],
+                'teacher_id' => $validated['teacher_id'],
                 'department' => $validated['department'],
                 'designation' => $validated['designation'],
                 'qualification' => $validated['qualification'],
@@ -186,16 +178,11 @@ class UsersController extends Controller
         $teacher->sections()->sync($validated['sections']);
 
         return back()->with('success', 'Teacher info saved successfully');
-        }
-        
-    public function storeOrUpdateStudent(Request $request, User $user)
+    }
+
+    public function storeOrUpdateStudent(StudentAssignRequest $request, User $user)
     {
-        $data = $request->validate([
-            'student_id' => 'required|string',
-            'section_id' => 'required|exists:sections,id',
-            'admission_year' => 'required|integer',
-            'roll_number' => 'required|integer|min:1',
-        ]);
+        $data = $request->validated();
         $section = Section::with('semester.course')->findOrFail($data['section_id']);
         $course = $section->semester->course;
 
@@ -206,7 +193,6 @@ class UsersController extends Controller
                 'section_id' => $section->id,
                 'admission_year' => $data['admission_year'],
 
-                // ✅ admin provided roll number
                 'roll_number' => $data['roll_number'],
 
                 // auto-filled

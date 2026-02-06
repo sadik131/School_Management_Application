@@ -28,7 +28,6 @@ const props = defineProps({
       <div class="rounded-lg bg-gray-50 p-4">
         <h2 class="text-lg font-semibold">
           Section: {{ list.name }}
-
         </h2>
         <p class="text-sm text-gray-600">
           Total Students: {{ list.students.length }}
