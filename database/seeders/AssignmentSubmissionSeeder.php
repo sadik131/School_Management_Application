@@ -23,7 +23,7 @@ class AssignmentSubmissionSeeder extends Seeder
                 AssignmentSubmission::create([
                     'assignment_id' => $assignment->id,
                     'student_id' => $student->id,
-                    'answer' => 'This is my assignment answer.',
+                    'answer_text' => 'This is my assignment answer.',
                     'submitted_at' => Carbon::now()->subDays(rand(0, 5)),
                 ]);
             }
