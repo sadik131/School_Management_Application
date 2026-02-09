@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assign;
+use App\Models\AssignmentSubmission;
+use App\Models\Student;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,19 +15,34 @@ class TeacherAssignmentController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {
-        $teacher = $request->user()->teacher;
-        $totalAssignments = $teacher->assignments()->count();
-        $assignments = $teacher->assignments()
-            ->with('section.semester.course')
-            ->latest()
-            ->get();
+{
+    $teacher = $request->user()->teacher;
 
-        return Inertia::render('Teacher/Assignments/Index', [
+    $assignments = $teacher->assignments()
+        ->with('section.semester.course')
+        ->latest()
+        ->get()
+        ->map(function ($a) {
+
+            $totalStudents = Student::where('section_id', $a->section_id)->count();
+
+            $submittedCount = AssignmentSubmission::where('assignment_id', $a->id)->count();
+
+            return [
+                'id' => $a->id,
+                'title' => $a->title,
+                'section' => $a->section,
+                'due_date' => Carbon::parse($a->due_date)->format('d M Y'),
+                'submitted' => $submittedCount,
+                'pending' => $totalStudents - $submittedCount,
+            ];
+        });
+
+    return Inertia::render('Teacher/Assignments/Index', [
         'assignments' => $assignments,
-        'totalAssignments' => $totalAssignments,
-        ]);
-    }
+        'totalAssignments' => $assignments->count(),
+    ]);
+}
 
     /**
      * Show the form for creating a new resource.
@@ -70,6 +88,42 @@ class TeacherAssignmentController extends Controller
         return redirect()
             ->route('TeacherDash')
             ->with('success', 'Assignment created successfully');
+    }
+
+    public function check($sectionId, Assign $assignment)
+    {
+        // safety: assignment must belong to section
+        abort_if($assignment->section_id != $sectionId, 404);
+
+        $submissions = AssignmentSubmission::where('assignment_id', $assignment->id)
+            ->with('student.user')
+            ->get()
+            ->map(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'student_name' => $s->student->user->name,
+                    'roll' => $s->student->roll_number,
+                    'answer_text' => $s->answer_text,
+                    'marks' => $s->marks,
+                ];
+            });
+
+
+        return Inertia::render('Teacher/Assignments/Check', [
+            'assignment' => [
+                'id' => $assignment->id,
+                'title' => $assignment->title,
+            ],
+            'submissions' => $submissions,
+        ]);
+    }
+
+    public function storeMarks(Request $request, Assign $assignment)
+    {
+        AssignmentSubmission::where('id', $request->submission_id)
+            ->update(['marks' => $request->marks]);
+
+        return back()->with('success', 'Marks saved');
     }
 
     /**

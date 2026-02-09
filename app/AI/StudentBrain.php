@@ -13,10 +13,10 @@ class StudentBrain
         $student = $user->student ?? null;
 
         if (!$student) {
-            return "❌ <b>Student profile not found.</b>";
+            return "<b>Student profile not found.</b>";
         }
 
-        // 🔹 Pending assignments
+        //  Pending assignments
         if (str_contains($q, 'pending')) {
             $pending = Assign::where('section_id', $student->section_id)
                 ->whereDoesntHave('submissions', function ($q) use ($student) {
@@ -24,12 +24,12 @@ class StudentBrain
                 })
                 ->count();
 
-            return "📚 <b>My Pending Assignments</b><br>
+            return "<b>My Pending Assignments</b><br>
             ━━━━━━━━━━━━━━━━━━<br>
             &nbsp;&nbsp;Pending : {$pending}";
         }
 
-        // 🔹 My attendance
+        //  My attendance
         if (str_contains($q, 'attendance')) {
             $total = Attendance::where('student_id', $student->id)->count();
             $present = Attendance::where('student_id', $student->id)
@@ -45,8 +45,8 @@ class StudentBrain
             &nbsp;&nbsp;Percentage : {$percent}%";
         }
 
-        // ❌ Anything else
-        return "❌ <b>Access Limited</b><br>
+        // Anything else
+        return "<b>Access Limited</b><br>
         You can ask about:<br>
         • my pending assignments<br>
         • my attendance";

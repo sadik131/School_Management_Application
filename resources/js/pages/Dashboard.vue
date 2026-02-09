@@ -1,10 +1,11 @@
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue'
 import { dashboard } from '@/routes'
-import { Head,Link } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
 import { ref, onMounted } from 'vue'
 import Chart from 'chart.js/auto'
 import { nextTick } from 'vue'
+import { Eye } from 'lucide-vue-next'
 
 const breadcrumbs = [
     { title: 'Admin Dashboard', href: dashboard().url },
@@ -13,101 +14,109 @@ const breadcrumbs = [
 
 const chartRef = ref(null)
 
+const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    })
+}
+
 onMounted(async () => {
 
     const assignments = props.stats?.assignment ?? []
 
-const labels = assignments.map(a => a.title)
+    const labels = assignments.map(a => a.title)
 
-const submittedData = assignments.map(a => a.submitted_count ?? 0)
+    const submittedData = assignments.map(a => a.submitted_count ?? 0)
 
-const pendingData = assignments.map(a =>
-  Math.max(0, (a.total_students ?? 0) - (a.submitted_count ?? 0))
-)
+    const pendingData = assignments.map(a =>
+        Math.max(0, (a.total_students ?? 0) - (a.submitted_count ?? 0))
+    )
 
 
-  await nextTick()
-  if (!chartRef.value) return
+    await nextTick()
+    if (!chartRef.value) return
 
-  const ctx = chartRef.value.getContext('2d')
+    const ctx = chartRef.value.getContext('2d')
 
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels:labels,
-      datasets: [
-        {
-          label: 'Submitted',
-          data: submittedData,
-          backgroundColor: 'rgba(34,197,94,0.85)',
-          hoverBackgroundColor: 'rgba(34,197,94,1)',
-          borderRadius: 10,          
-          barThickness: 28,
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Submitted',
+                    data: submittedData,
+                    backgroundColor: 'rgba(34,197,94,0.85)',
+                    hoverBackgroundColor: 'rgba(34,197,94,1)',
+                    borderRadius: 10,
+                    barThickness: 28,
+                },
+                {
+                    label: 'Pending',
+                    data: pendingData,
+                    backgroundColor: 'rgba(239,68,68,0.85)',
+                    hoverBackgroundColor: 'rgba(239,68,68,1)',
+                    borderRadius: 10,
+                    barThickness: 28,
+                },
+            ],
         },
-        {
-          label: 'Pending',
-          data: pendingData,
-          backgroundColor: 'rgba(239,68,68,0.85)',
-          hoverBackgroundColor: 'rgba(239,68,68,1)',
-          borderRadius: 10,
-          barThickness: 28,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: 1200,
-        easing: 'easeOutQuart',    
-      },
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: {
-            usePointStyle: true,    
-            padding: 20,
-            font: {
-              size: 13,
-              weight: '600',
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 1200,
+                easing: 'easeOutQuart',
             },
-          },
-        },
-        tooltip: {
-          backgroundColor: '#111827',
-          titleColor: '#fff',
-          bodyColor: '#e5e7eb',
-          padding: 12,
-          cornerRadius: 8,         
-        },
-      },
-      scales: {
-        x: {
-          grid: {
-            display: false,         
-          },
-          ticks: {
-            font: {
-              size: 12,
-              weight: '500',
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: 13,
+                            weight: '600',
+                        },
+                    },
+                },
+                tooltip: {
+                    backgroundColor: '#111827',
+                    titleColor: '#fff',
+                    bodyColor: '#e5e7eb',
+                    padding: 12,
+                    cornerRadius: 8,
+                },
             },
-          },
-        },
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(0,0,0,0.05)', // 🔥 soft grid
-          },
-          ticks: {
-            stepSize: 5,
-            font: {
-              size: 12,
+            scales: {
+                x: {
+                    grid: {
+                        display: false,
+                    },
+                    ticks: {
+                        font: {
+                            size: 12,
+                            weight: '500',
+                        },
+                    },
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)', //  soft grid
+                    },
+                    ticks: {
+                        stepSize: 5,
+                        font: {
+                            size: 12,
+                        },
+                    },
+                },
             },
-          },
         },
-      },
-    },
-  })
+    })
 })
 
 
@@ -225,7 +234,7 @@ const attendanceRows = [
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-lg font-semibold">New Assignments</h2>
                     <Link href="/assignments" class="text-sm text-blue-600">
-                    View All
+                        View All
                     </Link>
                 </div>
 
@@ -250,7 +259,7 @@ const attendanceRows = [
                                 </span>
                             </td>
                             <td>{{ a.teacher.user.name }}</td>
-                            <td class="text-gray-500">{{ a.due_date }}</td>
+                            <td class="text-gray-500">{{ formatDate(a.due_date) }}</td>
 
                         </tr>
                     </tbody>
@@ -273,6 +282,7 @@ const attendanceRows = [
                                 <th class="text-start">Total Student</th>
                                 <th class="text-start">Submitted</th>
                                 <th class="text-start">Pending</th>
+                                <th class="text-start">View</th>
                             </tr>
                         </thead>
 
@@ -291,12 +301,17 @@ const attendanceRows = [
                                 <td>{{ row.total_students }}</td>
                                 <td>{{ row.submitted_count }}</td>
                                 <td class="font-semibold text-red-500">
-                                {{ Math.max(0, row.total_students - row.submitted_count) }}
+                                    {{ Math.max(0, row.total_students - row.submitted_count) }}
+                                </td>
+                                <td>
+                                    <Link :href="`/admin/assignments/${row.id}/results`"
+                                    class="text-yellow-600 hover:underline font-medium">
+                                    <Eye class="w-5 h-5" />
+                                </Link>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                    <!-- {{ row }} -->
                 </div>
             </section>
             <!-- ================= ATTENDANCE MONITORING ================= -->

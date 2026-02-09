@@ -29,7 +29,7 @@ const closeEditModal = () => {
   showEditModal.value = false
 }
 
-// 🔥 teacher basic update only
+//  teacher basic update only
 const saveProfileFromModal = () => {
   router.put('/teacher/profile/basic', editProfile.value.basic, {
     onSuccess: () => {

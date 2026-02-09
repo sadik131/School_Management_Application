@@ -9,7 +9,8 @@ class AssignmentSubmission extends Model
     protected $fillable = [
         'assignment_id',
         'student_id',
-        'answer',
+        'answer_text',
+        'marks',
         'submitted_at',
     ];
 

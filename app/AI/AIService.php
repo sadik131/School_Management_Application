@@ -14,10 +14,10 @@ class AIService
         $user = Auth::user();
 
         if (!$user) {
-            return "❌ <b>Unauthorized</b><br>Please login first.";
+            return " <b>Unauthorized</b><br>Please login first.";
         }
 
-        // 🔐 STRICT ROLE-BASED ROUTING
+        //  STRICT ROLE-BASED ROUTING
         if ($user->hasRole('admin')) {
             return AdminBrain::answer($question, $user);
         }
@@ -30,6 +30,6 @@ class AIService
             return StudentBrain::answer($question, $user);
         }
 
-        return "❌ <b>Access Denied</b>";
+        return " <b>Access Denied</b>";
     }
 }

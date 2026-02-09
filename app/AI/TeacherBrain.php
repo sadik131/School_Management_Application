@@ -17,7 +17,7 @@ class TeacherBrain
             return "❌ <b>Teacher profile not found.</b>";
         }
 
-        // 🔹 My assignments
+        // My assignments
         if (str_contains($q, 'my assignment')) {
             $total = Assign::where('teacher_id', $teacher->id)->count();
 
@@ -26,7 +26,7 @@ class TeacherBrain
             Total Assignments : {$total}";
         }
 
-        // 🔹 Pending submissions (who didn’t submit)
+        // Pending submissions (who didn’t submit)
         if (str_contains($q, 'who') || str_contains($q, 'submit')) {
             $pending = AssignmentSubmission::whereHas('assignment', function ($q) use ($teacher) {
                 $q->where('teacher_id', $teacher->id);
@@ -37,7 +37,7 @@ class TeacherBrain
             Pending Submissions : {$pending}";
         }
 
-        // 🔹 Attendance summary (teacher’s sections)
+        // Attendance summary (teacher’s sections)
         if (str_contains($q, 'attendance')) {
             $records = Attendance::whereIn(
                 'section_id',

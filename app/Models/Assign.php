@@ -19,6 +19,10 @@ class Assign extends Model
         'total_students',
     ];
 
+    protected $casts = [
+    'due_date' => 'date',
+];
+
     public function section()
     {
         return $this->belongsTo(Section::class);

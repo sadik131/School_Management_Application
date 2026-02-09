@@ -1,11 +1,20 @@
-<script setup lang="ts">
+<script setup>
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 
-const props = defineProps<{
-  assignments: Array<any>
-  totalAssignments: number
-}>()
+
+const props = defineProps({
+  assignments: Array,
+  totalAssignments: Number
+})
+
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+}
 </script>
 
 <template>
@@ -14,9 +23,9 @@ const props = defineProps<{
 
   <AppLayout>
     <div class="space-y-6 p-4">
-
       <!-- ================= HEADER ================= -->
       <div class="flex items-center justify-between">
+
         <div>
           <h2 class="text-2xl font-semibold text-gray-800">
             📘 My Assignments
@@ -38,13 +47,20 @@ const props = defineProps<{
         <div v-for="a in assignments" :key="a.id" class="rounded-xl border bg-white p-5 shadow-sm
                  transition hover:-translate-y-0.5 hover:shadow-md">
           <div class="flex items-center justify-between gap-4">
-
             <!-- LEFT INFO -->
             <div class="space-y-2">
               <h3 class="text-lg font-semibold text-gray-800">
                 {{ a.title }}
               </h3>
+              <div class="flex gap-2">
+                <span class="text-green-600 font-semibold">
+                  Total Submit: {{ a.submitted }} 
+                </span>
 
+                <span class="text-red-600 font-semibold">
+                  Pending: {{ a.pending }}
+                </span>
+              </div>
               <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
 
                 <span class="rounded-full bg-indigo-100 px-3 py-1 text-indigo-700">
@@ -63,7 +79,7 @@ const props = defineProps<{
             </div>
 
             <!-- RIGHT ACTION -->
-            <Link :href="`/teacher/sections/${a.section.id}/assignments`" class="rounded-lg bg-green-600 px-4 py-2 text-sm text-white
+            <Link :href="`/teacher/sections/${a.section.id}/assignments/${a.id}/check`" class="rounded-lg bg-green-600 px-4 py-2 text-sm text-white
                      shadow hover:bg-green-700 whitespace-nowrap">
               Check →
             </Link>

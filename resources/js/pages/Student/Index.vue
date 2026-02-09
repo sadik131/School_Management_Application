@@ -8,7 +8,8 @@ import { computed } from 'vue'
 const props = defineProps({
   user: Object,
   student: Object,
-  stats: Object,
+  stats: Array,
+  assignments: Array,
 })
 
 // Student basic info
@@ -23,36 +24,11 @@ const studentInfo = {
 
 // KPI stats
 const stats = {
-  attendance: 78,
-  submitted: 11,
-  pending: 4,
-  examStatus: 'Eligible', // Eligible | At Risk
+  attendance: props.stats.attendance,
+  submitted: props.stats.submitted,
+  pending: props.stats.pending,
+  examStatus: props.stats.examStatus,
 }
-
-// Assignments (dummy)
-const assignments = [
-  {
-    id: 1,
-    title: 'Math Assignment 1',
-    subject: 'Mathematics',
-    due_date: '28 Jan 2026',
-    status: 'Pending',
-  },
-  {
-    id: 2,
-    title: 'C Programming Basics',
-    subject: 'Programming',
-    due_date: '22 Jan 2026',
-    status: 'Submitted',
-  },
-  {
-    id: 3,
-    title: 'English Essay',
-    subject: 'English',
-    due_date: '20 Jan 2026',
-    status: 'Late',
-  },
-]
 
 /* ================= KPI ================= */
 const kpiCards = computed(() => [
@@ -84,9 +60,12 @@ const kpiCards = computed(() => [
       : 'from-red-500 to-orange-500',
   },
 ])
+
+
 </script>
 
 <template>
+
   <Head title="Student Dashboard" />
 
   <AppLayout>
@@ -103,15 +82,10 @@ const kpiCards = computed(() => [
           Roll: {{ props.student.roll }} | StudentID: {{ props.student.student_id }}
         </p>
       </div>
-
       <!-- ================= KPI CARDS ================= -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div
-          v-for="card in kpiCards"
-          :key="card.title"
-          class="rounded-xl p-4 text-white shadow bg-gradient-to-r"
-          :class="card.color"
-        >
+        <div v-for="card in kpiCards" :key="card.title" class="rounded-xl p-4 text-white shadow bg-gradient-to-r"
+          :class="card.color">
           <p class="text-sm opacity-80">
             {{ card.title }}
           </p>
@@ -127,10 +101,7 @@ const kpiCards = computed(() => [
           <h3 class="text-sm font-semibold text-gray-700">
             📄 My Assignments
           </h3>
-          <Link
-            href="#"
-            class="text-sm text-indigo-600 hover:underline"
-          >
+          <Link href="#" class="text-sm text-indigo-600 hover:underline">
             View All
           </Link>
         </div>
@@ -142,16 +113,12 @@ const kpiCards = computed(() => [
                 <th class="px-4 py-3 text-left">Title</th>
                 <th class="px-4 py-3 text-left">Subject</th>
                 <th class="px-4 py-3 text-center">Due Date</th>
+                <th class="px-4 py-3 text-center">Marks</th>
                 <th class="px-4 py-3 text-right">Status</th>
               </tr>
             </thead>
-
             <tbody class="divide-y">
-              <tr
-                v-for="a in assignments"
-                :key="a.id"
-                class="hover:bg-gray-50"
-              >
+              <tr v-for="a in props.assignments" :key="a.id" class="hover:bg-gray-50">
                 <td class="px-4 py-3 font-medium text-gray-800">
                   {{ a.title }}
                 </td>
@@ -161,18 +128,52 @@ const kpiCards = computed(() => [
                 <td class="px-4 py-3 text-center text-gray-600">
                   {{ a.due_date }}
                 </td>
-                <td class="px-4 py-3 text-right">
-                  <span
-                    class="rounded-full px-3 py-1 text-xs font-medium"
-                    :class="{
-                      'bg-green-100 text-green-700': a.status === 'Submitted',
-                      'bg-red-100 text-red-700': a.status === 'Pending',
-                      'bg-orange-100 text-orange-700': a.status === 'Late',
-                    }"
-                  >
-                    {{ a.status }}
+                <td class="px-4 py-3 text-center">
+
+                  <!-- Show marks ONLY if graded -->
+                  <span v-if="a.marks !== null" class="font-semibold text-green-700">
+                    {{ a.marks }}
                   </span>
+                  <span v-else-if="a.status == 'Late'" class="font-semibold text-red-700">
+                    0
+                  </span>
+
+
+                  <!-- Otherwise show nothing / dash -->
+                  <span v-else class="text-gray-400 text-xs">
+                    —
+                  </span>
+
                 </td>
+                <td class="px-4 py-3 text-right">
+
+                  <!-- Graded (highest priority) -->
+                  <span v-if="a.marks !== null"
+                    class="rounded-full px-3 py-1 text-xs font-medium bg-blue-100 text-blue-700">
+                    Graded
+                  </span>
+
+                  <!-- Submitted but not graded -->
+                  <span v-else-if="a.status === 'Submitted'"
+                    class="rounded-full px-3 py-1 text-xs font-medium bg-green-100 text-green-700">
+                    Submitted
+                  </span>
+
+                  <!-- Late -->
+                  <span v-else-if="a.status === 'Late'"
+                    class="rounded-full px-3 py-1 text-xs font-medium bg-red-100 text-red-700">
+                    Fail
+                  </span>
+
+                  <!-- Pending -->
+                  <Link v-else :href="`/student/assignments/${a.id}`"
+                    class="text-indigo-600 hover:underline text-sm font-medium">
+                    Submit
+                  </Link>
+
+                </td>
+
+
               </tr>
             </tbody>
           </table>

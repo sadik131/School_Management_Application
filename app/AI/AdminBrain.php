@@ -19,27 +19,27 @@ class AdminBrain
     {
         $q = strtolower(trim($question));
 
-        // 🔹 FULL SYSTEM OVERVIEW
+        // FULL SYSTEM OVERVIEW
         if (str_contains($q, 'dashboard') || str_contains($q, 'summary') || str_contains($q, 'overview')) {
             return self::dashboard();
         }
 
-        // 🔹 USER STATS
+        // USER STATS
         if (str_contains($q, 'user')) {
             return self::users();
         }
 
-        // 🔹 ACADEMIC STRUCTURE
+        // ACADEMIC STRUCTURE
         if (str_contains($q, 'course') || str_contains($q, 'semester') || str_contains($q, 'section')) {
             return self::academics();
         }
 
-        // 🔹 ASSIGNMENTS
+        // ASSIGNMENTS
         if (str_contains($q, 'assignment')) {
             return self::assignments();
         }
 
-        // 🔹 ATTENDANCE
+        // ATTENDANCE
         if (str_contains($q, 'attendance')) {
             return self::attendance();
         }

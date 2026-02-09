@@ -98,12 +98,7 @@ const mainNavItems = [
         roles: ['teacher'],
         icon: Shapes,
     },
-    {
-        title: '/teacher/assignments/check',
-        href: '/teacher/assignments/check',
-        roles: ['teacher'],
-        icon: CopyCheck,
-    },
+    
 
 ];
 

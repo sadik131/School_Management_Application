@@ -1,5 +1,7 @@
 <?php
 
+//   ------------------Controller--------------------------
+use App\Http\Controllers\AdminAssignmentResultController;
 use App\Http\Controllers\AIController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\PermissionController;
@@ -14,11 +16,17 @@ use App\Http\Controllers\TeacherAssignmentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\UsersController;
+//   ------------------Controller End--------------------------
+
+//   ------------------Models--------------------------
+
 use App\Models\Assign;
 use App\Models\Course;
 use App\Models\Section;
 use App\Models\Student;
 use App\Models\Teacher;
+//   ------------------Models End --------------------------
+
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -41,8 +49,8 @@ Route::get('/dashboard', function () {
                 'total_teachers' => Teacher::count(),
                 'total_course' => Course::count(),
                 'total_section' => Section::count(),
-                'total_assignments'=> Assign::count(),
-                'assignment'=> Assign::with(
+                'total_assignments' => Assign::count(),
+                'assignment' => Assign::with(
                     'teacher',
                     'teacher.user',
                     'section',
@@ -59,33 +67,19 @@ Route::get('/dashboard', function () {
 
     // STUDENT
     if ($user->hasRole('student')) {
-        return redirect()->route('student.dashboard.index');
+        return redirect()->route('dashboard.index');
     }
 
     abort(403);
 })
-->middleware(['auth', 'verified'])
-->name('dashboard');
-
-// Route::get('dashboard', function () {
-//     return Inertia::render('Dashboard', [
-//         'stats' => [
-//             'total_students' => Student::count(),
-//             'total_teachers' => Teacher::count(),
-//             'total_course' => Course::count(),
-//             'total_section' => Section::count(),
-//             'total_assignments' => Assign::count(),
-//             'assignment' => Assign::with('teacher', 'teacher.user', 'section', 'section.semester')->latest()->take(5)->get(),
-
-//         ],
-//     ]);
-// })->middleware(['auth', 'verified'])->name('dashboard');
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 // teacherDashbord
 Route::get('/TeacherDash', [TeacherDashboardController::class, 'index'])->name('TeacherDash');
 
 // student dashboard
-Route::resource('/Student/dashboard', StudentAssignmentController::class)->name('index', 'student.dashboard.index');
+Route::resource('/Student/dashboard', StudentAssignmentController::class);
 
 // -------------------------------------------------------------------
 
@@ -140,13 +134,19 @@ Route::get('/teacher/assignments', function () {
     return Inertia::render('Teacher/Assignments/Index');
 })->name('teacher.assignments');
 
-Route::get('/teacher/assignments/check', function () {
-    return Inertia::render('Teacher/Assignments/Check');
-})->name('teacher.assignments.check');
+Route::get(
+    '/teacher/sections/{section}/assignments/{assignment}/check',
+    [TeacherAssignmentController::class, 'check']
+)->name('teacher.assignments.check');
+
+Route::post(
+    '/teacher/assignments/{assignment}/marks',
+    [TeacherAssignmentController::class, 'storeMarks']
+)->name('teacher.assignments.marks');
 
 Route::get('/teacher/section/{id}', [SectionController::class, 'show'])->name('teacher.section.show');
 
-// -------------------------------------------------------------------
+// -----------------------------Admin Route--------------------------------------
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('users', UsersController::class);
@@ -172,6 +172,28 @@ Route::get(
     [TeacherAssignmentController::class, 'index']
 )->name('teacher.assignments.index');
 
+Route::get(
+    '/admin/assignments/{assignment}/results',
+    [AdminAssignmentResultController::class, 'index']
+)->name('admin.assignments.results');
+
+
+
+
+// -------------------------------------------------------------------
+
 // talk with AI
 Route::post('/ai/chat', [AIController::class, 'chat'])
     ->middleware('auth');
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/student/assignments/{assignment}',
+        [StudentAssignmentController::class, 'show']
+    )->name('student.assignments.show');
+
+    Route::post('/student/assignments/{assignment}/submit',
+        [StudentAssignmentController::class, 'submit']
+    )->name('student.assignments.submit');
+
+});

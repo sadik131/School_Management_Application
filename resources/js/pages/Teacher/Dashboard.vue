@@ -73,7 +73,6 @@ const kpiCards = computed(() => [
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex flex-col gap-8 p-4">
-
       <!-- ================= KPI ================= -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="card in kpiCards" :key="card.title" class="rounded-xl p-4 text-white shadow bg-linear-to-r"
@@ -86,7 +85,6 @@ const kpiCards = computed(() => [
           </p>
         </div>
       </div>
-
       <!-- ================= TABLES ================= -->
       <div class="flex w-full gap-4">
 
@@ -173,11 +171,11 @@ const kpiCards = computed(() => [
                 </td>
 
                 <td class="px-4 py-3">
-                  0
+                  {{ section.submissions_count ?? 0 }}
                 </td>
 
                 <td class="px-4 py-3 text-left text-red-400 font-semibold">
-                  0
+                   {{ section.pending  ?? 0 }}
                 </td>
               </tr>
 

@@ -35,7 +35,6 @@ const closeEditModal = () => {
 }
 
 const saveProfileFromModal = () => {
-  // 🔥 later backend API call হবে
   router.put('/student/profile/basic', editProfile.value.basic, {
     onSuccess: () => {
       showEditModal.value = false
