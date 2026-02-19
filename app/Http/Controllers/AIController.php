@@ -8,16 +8,15 @@ use Illuminate\Http\Request;
 class AIController extends Controller
 {
     public function chat(Request $request)
-{
-    $request->validate([
-        'question' => 'required|string',
-    ]);
+    {
+        $request->validate([
+            'question' => 'required|string|max:1000',
+        ]);
 
-    $reply = AIService::ask($request->question);
+        $reply = AIService::ask($request->question);
 
-    return response()->json([
-        'text' => $reply,
-    ]);
-}
-
+        return response()->json([
+            'text' => $reply,
+        ]);
+    }
 }

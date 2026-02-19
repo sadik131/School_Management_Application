@@ -26,6 +26,7 @@ const chatBox = ref(null)
 
 // Send message
 const sendMessage = async () => {
+  console.log("SEND FUNCTION TRIGGERED");
   if (!newMessage.value.trim()) return
 
   // User message

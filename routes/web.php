@@ -40,7 +40,9 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
 
     $user = auth()->user();
-
+ if (!$user) {
+        abort(403);
+    }
     // ADMIN
     if ($user->hasRole('admin')) {
         return Inertia::render('Dashboard', [
@@ -74,6 +76,18 @@ Route::get('/dashboard', function () {
 })
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+
+// -----------------------------Admin Route--------------------------------------
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('users', UsersController::class);
+    Route::resource('roles', RoleController::class);
+    Route::resource('permission', PermissionController::class);
+    Route::resource('courses', CourseController::class);
+    Route::resource('semesters', SemesterController::class);
+    Route::resource('sections', SectionController::class);
+});
 
 // teacherDashbord
 Route::get('/TeacherDash', [TeacherDashboardController::class, 'index'])->name('TeacherDash');
@@ -146,16 +160,7 @@ Route::post(
 
 Route::get('/teacher/section/{id}', [SectionController::class, 'show'])->name('teacher.section.show');
 
-// -----------------------------Admin Route--------------------------------------
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::resource('users', UsersController::class);
-    Route::resource('roles', RoleController::class);
-    Route::resource('permission', PermissionController::class);
-    Route::resource('courses', CourseController::class);
-    Route::resource('semesters', SemesterController::class);
-    Route::resource('sections', SectionController::class);
-});
 
 require __DIR__.'/settings.php';
 
@@ -178,13 +183,18 @@ Route::get(
 )->name('admin.assignments.results');
 
 
-
+Route::get('/ssl-test', function () {
+    return file_get_contents('https://www.google.com');
+});
 
 // -------------------------------------------------------------------
 
 // talk with AI
 Route::post('/ai/chat', [AIController::class, 'chat'])
     ->middleware('auth');
+
+
+
 
 Route::middleware(['auth'])->group(function () {
 
